@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Protect the core app_data collection
+    match /app_data/{document} {
+      // 1. Require Authentication: Only users with a valid session (Anonymous or otherwise) can interact.
+      allow read: if request.auth != null;
+      
+      // 2. Data Validation: Ensure writes are updates/creates, never deletes.
+      allow create, update: if request.auth != null;
+      
+      // 3. Strict Safety: Explicitly block anyone from deleting an entire collection document.
+      allow delete: if false;
+    }
+
+    // Default Deny: Anything else is strictly forbidden.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

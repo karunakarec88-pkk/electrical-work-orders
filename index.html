@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com;">
+    <title>Electrical Work Orders</title>
+
+    <!-- Mobile & PWA -->
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Login / Role Selector Overlay -->
+        <div id="role-selector" class="overlay">
+            <div class="overlay-content">
+                <h1>Welcome</h1>
+                <p>Please select your role and enter password</p>
+                <div class="login-box">
+                    <div class="login-inputs">
+                        <input type="password" id="owner-pass" placeholder="Owner Password">
+                        <button onclick="auth.login('owner')" class="btn-primary">Login as Owner</button>
+                    </div>
+                    <div class="divider">OR</div>
+                    <div class="login-inputs">
+                        <input type="password" id="admin-pass" placeholder="Admin Password">
+                        <button onclick="auth.login('admin')" class="btn-accent">Login as Admin</button>
+                    </div>
+                    <div class="divider">OR</div>
+                    <div class="login-inputs">
+                        <input type="password" id="technician-pass" placeholder="Technician Password">
+                        <button onclick="auth.login('technician')" class="btn-secondary">Login as Technician</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <header>
+            <div class="header-content">
+                <i data-lucide="zap" class="logo-icon"></i>
+                <div>
+                    <h1>Electrical Work Orders</h1>
+                    <p>Outside Campus</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="cloud-status" class="status-container hidden">
+                    <div class="status-dot"></div>
+                    <span>CLOUD SYNC</span>
+                </div>
+                <div id="user-info" class="hidden flex items-center gap-3">
+                    <button id="backup-btn" onclick="storage.downloadBackup()" class="btn-icon hidden"
+                        title="Safe Cloud Backup">
+                        <i data-lucide="shield-check" class="text-accent"></i>
+                    </button>
+                    <span id="role-display"></span>
+                    <button onclick="auth.logout()" class="btn-icon" title="Logout">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-content" class="hidden">
+            <nav class="dashboard-grid">
+                <button onclick="router.navigate('upload')" class="nav-card">
+                    <i data-lucide="upload"></i>
+                    <span>UPLOAD</span>
+                </button>
+                <button onclick="router.navigate('pending')" class="nav-card">
+                    <div class="icon-wrapper">
+                        <i data-lucide="clock"></i>
+                        <span id="pending-count" class="badge hidden">0</span>
+                    </div>
+                    <span>PENDING</span>
+                </button>
+                <button onclick="router.navigate('completed')" class="nav-card">
+                    <i data-lucide="check-circle"></i>
+                    <span>COMPLETED</span>
+                </button>
+                <button onclick="router.navigate('used-materials')" class="nav-card">
+                    <i data-lucide="list"></i>
+                    <span>USED MATERIAL LIST</span>
+                </button>
+                <button onclick="router.navigate('inventory')" class="nav-card">
+                    <i data-lucide="database"></i>
+                    <span>INVENTORY</span>
+                </button>
+                <button onclick="router.navigate('indents')" class="nav-card" id="nav-indents">
+                    <i data-lucide="file-text"></i>
+                    <span>INDENTS</span>
+                </button>
+                <button onclick="router.navigate('gate-pass')" class="nav-card" id="nav-gate-pass">
+                    <i data-lucide="ticket"></i>
+                    <span>GATE PASS</span>
+                </button>
+                <button onclick="router.navigate('tender')" class="nav-card" id="nav-tender">
+                    <i data-lucide="briefcase"></i>
+                    <span>TENDER(W&S)</span>
+                </button>
+            </nav>
+
+            <section id="view-container" class="hidden">
+                <header class="view-header">
+                    <button onclick="router.navigate('home')" class="btn-back">
+                        <i data-lucide="chevron-left"></i>
+                        Back
+                    </button>
+                    <h2 id="view-title"></h2>
+                </header>
+                <div id="view-content"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs (Compat Version for standard script support) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/modules/upload.js"></script>
+    <script src="js/modules/pending.js"></script>
+    <script src="js/modules/completed.js"></script>
+    <script src="js/modules/usedMaterials.js"></script>
+    <script src="js/modules/inventory.js"></script>
+    <script src="js/modules/indents.js"></script>
+    <script src="js/modules/gatepass.js"></script>
+    <script src="js/modules/monthlyOrders.js"></script>
+    <script src="js/modules/deleted.js"></script>
+    <script src="js/modules/tender.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

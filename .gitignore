@@ -1,0 +1,26 @@
+# System Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Gemini/Antigravity Data
+.gemini/
+antigravity_data.json
+task.md
+walkthrough.md
+implementation_plan.md
+
+# Archives & Temporary Data
+*.zip
+*.docx
+extracted_docx/
+
+# Environment Files
+.env*
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Local storage backups (if any)
+*.log
