@@ -96,7 +96,7 @@ const indentsModule = {
                                                 <span class="w-24 text-[9px] text-slate-500 uppercase font-black tracking-widest">Purchased</span>
                                                 <div class="flex items-baseline">
                                                     <span class="text-xl text-slate-100 font-black">: ${initialQty}</span>
-                                                    <span class="text-xs text-slate-600 font-bold italic ml-1.5">${unit}</span>
+                                                    <span class="text-xs text-slate-600 font-bold italic ml-2">&nbsp; ${unit}</span>
                                                 </div>
                                             </div>
                                             
@@ -104,7 +104,7 @@ const indentsModule = {
                                                 <span class="w-24 text-[9px] text-accent/60 uppercase font-black tracking-widest">Received</span>
                                                 <div class="flex items-baseline">
                                                     <span class="text-xl text-accent font-black">: ${usedQty}</span>
-                                                    <span class="text-xs text-accent/50 font-bold italic ml-1.5">${unit}</span>
+                                                    <span class="text-xs text-accent/50 font-bold italic ml-2">&nbsp; ${unit}</span>
                                                 </div>
                                             </div>
                                             
@@ -112,7 +112,7 @@ const indentsModule = {
                                                 <span class="w-24 text-[9px] text-indigo-400/70 uppercase font-black tracking-widest">Sec Store</span>
                                                 <div class="flex items-baseline">
                                                     <span class="text-xl text-indigo-300 font-black">: ${initialQty - usedQty}</span>
-                                                    <span class="text-xs text-indigo-400/50 font-bold italic ml-1.5">${unit}</span>
+                                                    <span class="text-xs text-indigo-400/50 font-bold italic ml-2">&nbsp; ${unit}</span>
                                                 </div>
                                             </div>
                                         </div>
