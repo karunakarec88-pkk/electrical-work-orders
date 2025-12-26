@@ -1,4 +1,4 @@
-const CACHE_NAME = 'work-order-v2';
+const CACHE_NAME = 'work-order-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -12,7 +12,7 @@ const ASSETS = [
     './js/modules/completed.js',
     './js/modules/upload.js',
     './js/modules/inventory.js',
-    './js/modules/monthlyOrders.js',
+    './js/modules/monthlyReport.js',
     './js/modules/indents.js',
     './js/modules/gatepass.js',
     './js/modules/tender.js',
@@ -24,6 +24,16 @@ self.addEventListener('install', (e) => {
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS);
+        })
+    );
+});
+
+self.addEventListener('activate', (e) => {
+    e.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+            );
         })
     );
 });
