@@ -1,148 +1,164 @@
 const usedMaterialsModule = {
-    render(container) {
-        const orders = storage.get('work_orders').filter(o => o.status === 'completed');
+    currentYear: null,
+    currentMonth: null,
 
-        // Group by Year -> then Group by Month -> then Group by Quarter
+    render(container) {
+        this.currentYear = null;
+        this.currentMonth = null;
+        this.renderFolders(container);
+    },
+
+    renderFolders(container) {
+        const orders = storage.get('work_orders').filter(o => o.status === 'completed');
         const archive = {};
+
         orders.forEach(o => {
             const d = new Date(o.completedAt);
             const year = d.getFullYear();
             const month = d.toLocaleString('default', { month: 'long' });
 
-            if (!archive[year]) archive[year] = {};
-            if (!archive[year][month]) archive[year][month] = {};
-            if (!archive[year][month][o.quarter]) archive[year][month][o.quarter] = [];
-
-            o.materials.forEach(m => {
-                archive[year][month][o.quarter].push({
-                    ...m,
-                    date: o.completedAt
-                });
-            });
+            if (!archive[year]) archive[year] = new Set();
+            archive[year].add(month);
         });
 
-        // Convert to sorted array for rendering
-        const sortedYears = Object.entries(archive).sort((a, b) => b[0] - a[0]);
+        const years = Object.keys(archive).sort((a, b) => b - a);
+
+        if (years.length === 0) {
+            container.innerHTML = '<div class="empty-state">No archived records found</div>';
+            return;
+        }
 
         container.innerHTML = `
-            <div class="search-box mb-4">
-                <input type="text" id="material-list-search" placeholder="Search by material or quarter..." oninput="usedMaterialsModule.filter()">
-            </div>
-            <div id="material-list-results">
-                ${this.renderArchive(sortedYears)}
+            <div class="archive-container">
+                <p class="text-xs text-muted mb-4">Select a year and month to view used materials.</p>
+                ${years.map(year => `
+                    <div class="archive-year-group mb-6">
+                        <h3 class="flex items-center gap-2 text-primary font-bold mb-3">
+                            <i data-lucide="calendar"></i> ${year}
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            ${Array.from(archive[year]).sort((a, b) => {
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            return months.indexOf(b) - months.indexOf(a);
+        }).map(month => `
+                                <div class="archive-folder" onclick="usedMaterialsModule.openMonth('${year}', '${month}')">
+                                    <i data-lucide="folder"></i>
+                                    <span>${month}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         `;
         lucide.createIcons();
     },
 
-    renderArchive(sortedYears) {
-        if (sortedYears.length === 0) {
-            return '<div class="empty-state">No materials used yet</div>';
-        }
+    openMonth(year, month) {
+        this.currentYear = year;
+        this.currentMonth = month;
+        const container = document.getElementById('view-content');
+        this.renderMonthDetails(container, year, month);
+    },
 
-        return sortedYears.map(([year, months]) => `
-            <div class="year-section mb-6">
-                <h3 class="year-title flex items-center gap-2 mb-4 text-primary text-xl font-bold">
-                    <i data-lucide="folder"></i> ${year}
-                </h3>
-                <div class="month-grid space-y-4">
-                    ${Object.entries(months).sort((a, b) => new Date(a[0] + ' 1 ' + year) - new Date(b[0] + ' 1 ' + year)).map(([month, quarters]) => `
-                        <div class="month-container bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-                            <div class="month-header p-4 bg-slate-800/50 flex justify-between items-center border-b border-slate-700">
-                                <h4 class="flex items-center gap-2 text-indigo-400 font-bold">
-                                    <i data-lucide="calendar" size="16"></i> ${month}
-                                </h4>
-                                ${auth.isAdmin() ? `
-                                    <button onclick="usedMaterialsModule.downloadMonthlyCSV('${year}', '${month}')" class="btn-micro bg-primary/20 text-primary hover:bg-primary/30 p-1.5 rounded flex items-center gap-1 text-[10px]" title="Download Monthly CSV">
-                                        <i data-lucide="download" size="12"></i> CSV
-                                    </button>
-                                ` : ''}
-                            </div>
-                            <div class="p-4 space-y-4">
-                                ${Object.entries(quarters).map(([q, materials]) => `
-                                    <div class="quarter-box">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded uppercase font-black">${q}</span>
-                                        </div>
-                                        <div class="space-y-2">
-                                            ${materials.map(m => `
-                                                <div class="flex justify-between items-center bg-black/20 p-2.5 rounded-lg border border-white/5">
-                                                    <div>
-                                                        <div class="text-[13px] font-bold text-slate-100">${m.item}</div>
-                                                        <div class="text-[9px] text-slate-500">${utils.formatDate(m.date)}</div>
-                                                    </div>
-                                                    <div class="text-xs text-accent font-black">Qty: ${m.quantity} ${utils.getUnit(m.item)}</div>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
+    renderMonthDetails(container, year, month) {
+        const orders = storage.get('work_orders').filter(o => {
+            if (o.status !== 'completed') return false;
+            const d = new Date(o.completedAt);
+            return d.getFullYear().toString() === year && d.toLocaleString('default', { month: 'long' }) === month;
+        }).sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+
+        container.innerHTML = `
+            <button class="btn-back" onclick="usedMaterialsModule.render(document.getElementById('view-content'))">
+                <i data-lucide="chevron-left"></i> Back to Archive
+            </button>
+
+            <div class="flex justify-between items-center mt-6 mb-4">
+                <h2 class="text-xl font-black text-indigo-400">${month} ${year}</h2>
+                ${auth.isOwnerOrAdmin() ? `
+                    <button onclick="usedMaterialsModule.downloadCSV('${year}', '${month}')" class="btn-primary !py-2 !px-4 flex items-center gap-2 text-sm">
+                        <i data-lucide="download" size="16"></i> CSV
+                    </button>
+                ` : ''}
+            </div>
+
+            <div class="search-box mb-4">
+                <input type="text" id="archive-search" placeholder="Search by quarter or material..." oninput="usedMaterialsModule.filterMonth()">
+            </div>
+
+            <div id="archive-results" class="space-y-4">
+                ${this.renderOrdersList(orders)}
+            </div>
+        `;
+        lucide.createIcons();
+    },
+
+    renderOrdersList(orders) {
+        if (orders.length === 0) return '<div class="empty-state">No matching records</div>';
+
+        return orders.map(o => `
+            <div class="order-card !border-slate-700/50">
+                <div class="flex justify-between mb-3 border-b border-white/5 pb-2">
+                    <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-black">${o.quarter}</span>
+                    <span class="text-[10px] text-slate-500 font-bold">${utils.formatDate(o.completedAt)}</span>
+                </div>
+                <div class="space-y-2">
+                    ${o.materials.map(m => `
+                        <div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5">
+                            <span class="text-xs text-slate-200">${m.item}</span>
+                            <span class="text-xs font-black text-accent">${m.quantity} ${utils.getUnit(m.item)}</span>
                         </div>
                     `).join('')}
+                    ${o.materials.length === 0 ? '<div class="text-[10px] text-muted italic">No materials used</div>' : ''}
                 </div>
             </div>
         `).join('');
     },
 
-    downloadMonthlyCSV(year, month) {
+    filterMonth() {
+        const query = document.getElementById('archive-search').value.toLowerCase().trim();
+        const year = this.currentYear;
+        const month = this.currentMonth;
+
+        const allOrders = storage.get('work_orders').filter(o => {
+            if (o.status !== 'completed') return false;
+            const d = new Date(o.completedAt);
+            return d.getFullYear().toString() === year && d.toLocaleString('default', { month: 'long' }) === month;
+        });
+
+        const filtered = allOrders.filter(o =>
+            o.quarter.toLowerCase().includes(query) ||
+            o.materials.some(m => m.item.toLowerCase().includes(query))
+        ).sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+
+        document.getElementById('archive-results').innerHTML = this.renderOrdersList(filtered);
+    },
+
+    downloadCSV(year, month) {
         const orders = storage.get('work_orders').filter(o => {
             if (o.status !== 'completed') return false;
             const d = new Date(o.completedAt);
             return d.getFullYear().toString() === year && d.toLocaleString('default', { month: 'long' }) === month;
         });
 
-        if (orders.length === 0) {
-            alert('No data for this month');
-            return;
-        }
-
-        let csv = "Quarter,Work Order Date,Item Name,Quantity,Unit\n";
+        let csv = "Quarter,Status,Completed Date,Remarks,Technicians,Material,Quantity,Unit\n";
         orders.forEach(o => {
-            o.materials.forEach(m => {
-                csv += `"${o.quarter}","${utils.formatDate(o.completedAt)}","${m.item}",${m.quantity},"${utils.getUnit(m.item)}"\n`;
-            });
+            const techs = o.technicians ? o.technicians.join(' | ') : 'N/A';
+            if (o.materials.length === 0) {
+                csv += `"${o.quarter}","Completed","${utils.formatDate(o.completedAt)}","${o.remarks}","${techs}","None",0,"N/A"\n`;
+            } else {
+                o.materials.forEach(m => {
+                    csv += `"${o.quarter}","Completed","${utils.formatDate(o.completedAt)}","${o.remarks}","${techs}","${m.item}",${m.quantity},"${utils.getUnit(m.item)}"\n`;
+                });
+            }
         });
 
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.setAttribute('hidden', '');
-        a.setAttribute('href', url);
-        a.setAttribute('download', `Used_Materials_${month}_${year}.csv`);
-        document.body.appendChild(a);
+        a.href = url;
+        a.download = `WorkOrders_${month}_${year}.csv`;
         a.click();
-        document.body.removeChild(a);
-    },
-
-    filter() {
-        const query = document.getElementById('material-list-search').value.toLowerCase().trim();
-        const orders = storage.get('work_orders').filter(o => o.status === 'completed');
-
-        const archive = {};
-        orders.forEach(o => {
-            const d = new Date(o.completedAt);
-            const monthYear = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-            const filteredMaterials = o.materials.filter(m =>
-                m.item.toLowerCase().includes(query) || o.quarter.toLowerCase().includes(query)
-            );
-
-            if (filteredMaterials.length > 0) {
-                if (!archive[monthYear]) archive[monthYear] = {};
-                if (!archive[monthYear][o.quarter]) archive[monthYear][o.quarter] = [];
-
-                filteredMaterials.forEach(m => {
-                    archive[monthYear][o.quarter].push({
-                        ...m,
-                        date: o.completedAt
-                    });
-                });
-            }
-        });
-
-        const sortedMonths = Object.entries(archive).sort((a, b) => new Date(b[0]) - new Date(a[0]));
-        document.getElementById('material-list-results').innerHTML = this.renderArchive(sortedMonths);
-        lucide.createIcons();
+        window.URL.revokeObjectURL(url);
     }
 };

@@ -12,9 +12,27 @@ const completedModule = {
             lucide.createIcons();
         }
 
-        const orders = storage.get('work_orders')
-            .filter(o => o.status === 'completed')
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const allCompleted = storage.get('work_orders').filter(o => o.status === 'completed');
+        const orders = allCompleted
+            .filter(o => {
+                const compDate = new Date(o.completedAt);
+                return compDate.getMonth() === currentMonth && compDate.getFullYear() === currentYear;
+            })
             .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+
+        if (allCompleted.length > 0 && orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>No work orders completed in ${now.toLocaleString('default', { month: 'long' })}.</p>
+                    <p class="text-xs mt-2 text-muted">Previous records are moved to <strong>USED MATERIAL LIST</strong> archive.</p>
+                </div>
+            `;
+            return;
+        }
 
         if (orders.length === 0) {
             container.innerHTML = '<div class="empty-state">No completed work orders</div>';

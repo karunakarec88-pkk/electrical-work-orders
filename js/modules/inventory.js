@@ -250,26 +250,6 @@ const inventoryModule = {
         this.triggerDownload(csvContent, `Inventory_${this.currentTab}_${query}.csv`);
     },
 
-    downloadMonthlyCSV(year, month) {
-        const orders = storage.get('work_orders').filter(o => {
-            const d = new Date(o.completedAt);
-            return o.status === 'completed' && d.getFullYear() == year && d.toLocaleString('default', { month: 'long' }) == month;
-        });
-
-        let csvContent = "data:text/csv;charset=utf-8,Uploaded Date,Completed Date,Quarter,Material Name,Quantity\n";
-        orders.forEach(o => {
-            if (o.materials.length === 0) {
-                csvContent += `"${utils.formatDate(o.createdAt)}","${utils.formatDate(o.completedAt)}","${o.quarter}","No Material",0\n`;
-            } else {
-                o.materials.forEach(m => {
-                    csvContent += `"${utils.formatDate(o.createdAt)}","${utils.formatDate(o.completedAt)}","${o.quarter}","${m.item}",${m.quantity} ${utils.getUnit(m.item)}\n`;
-                });
-            }
-        });
-
-        this.triggerDownload(csvContent, `Archive_${year}_${month}.csv`);
-    },
-
     triggerDownload(csvContent, filename) {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");

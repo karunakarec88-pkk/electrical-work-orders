@@ -49,9 +49,6 @@ const router = {
             case 'gate-pass':
                 gatePassModule.render(container);
                 break;
-            case 'monthly-orders':
-                monthlyOrdersModule.render(container);
-                break;
             case 'deleted':
                 deletedModule.render(container);
                 break;

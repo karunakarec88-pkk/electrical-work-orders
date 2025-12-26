@@ -800,6 +800,65 @@ textarea {
     margin-bottom: 0.25rem;
 }
 
+/* Archive Styles */
+.archive-folder {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem 1rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.archive-folder:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.archive-folder i {
+    color: var(--primary);
+    width: 32px;
+    height: 32px;
+}
+
+.archive-folder span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.archive-year-group h3 {
+    font-size: 1.1rem;
+    border-bottom: 2px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+.wo-rect-box {
+    background: var(--card-bg);
+    border-left: 4px solid var(--primary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.box-header-rect {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.box-body-rect {
+    padding: 1rem;
+}
+
 .flex-bw {
     display: flex;
     justify-content: space-between;
