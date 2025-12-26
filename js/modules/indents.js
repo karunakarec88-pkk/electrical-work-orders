@@ -8,7 +8,7 @@ const indentsModule = {
                     <i data-lucide="plus"></i> Create New Indent
                 </button>
             </div>
-            <div id="indents-list" class="space-y-4">
+            <div id="indents-list" class="space-y-10 pb-20">
                 ${this.renderList(indents)}
             </div>
         `;
@@ -21,43 +21,63 @@ const indentsModule = {
         }
 
         return indents.map(indent => `
-            <div class="indent-card px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg">
-                <div class="flex justify-between items-start border-b border-slate-700 pb-2 mb-2">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-muted">Indent No: <strong>${utils.sanitize(indent.indentNumber || 'N/A')}</strong></span>
-                            <span class="text-[10px] bg-slate-700 px-1.5 rounded uppercase font-bold text-slate-300">${indent.type || 'LOCAL'}</span>
-                            <div class="flex ml-auto" style="gap: 12px;">
-                                <button onclick="indentsModule.viewIndentDetails('${indent.id}')" class="btn-micro bg-slate-700 hover:bg-slate-600 text-slate-300 p-1 rounded" title="View Details">
-                                    <i data-lucide="eye" size="12"></i>
-                                </button>
-                                ${auth.isAdmin() ? `
-                                    <button onclick="indentsModule.downloadIndentCSV('${indent.id}')" class="btn-micro bg-primary/20 hover:bg-primary/30 text-primary p-1 rounded" title="Download CSV">
-                                        <i data-lucide="download" size="12"></i>
+            <div class="indent-group">
+                <div class="indent-card px-5 py-6 bg-slate-800/40 border-2 border-slate-700/50 rounded-2xl shadow-xl shadow-black/20 mb-8">
+                    <div class="flex justify-between items-start border-b border-slate-700 pb-2 mb-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-muted">Indent No: <strong>${utils.sanitize(indent.indentNumber || 'N/A')}</strong></span>
+                                <span class="text-[10px] bg-slate-700 px-1.5 rounded uppercase font-bold text-slate-300">${indent.type || 'LOCAL'}</span>
+                                <div class="flex ml-auto" style="gap: 12px;">
+                                    <button onclick="indentsModule.viewIndentDetails('${indent.id}')" class="btn-micro bg-slate-700 hover:bg-slate-600 text-slate-300 p-1 rounded" title="View Details">
+                                        <i data-lucide="eye" size="12"></i>
                                     </button>
-                                ` : ''}
+                                    ${auth.isAdmin() ? `
+                                        <button onclick="indentsModule.downloadIndentCSV('${indent.id}')" class="btn-micro bg-primary/20 hover:bg-primary/30 text-primary p-1 rounded" title="Download CSV">
+                                            <i data-lucide="download" size="12"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </div>
+                            <h4 class="text-primary">Date: ${utils.renderDate(indent.indentDate) || utils.renderDate(indent.createdAt)}</h4>
+                            ${indent.approvedAt ? `<p class="text-[10px] text-muted-foreground mt-1">Approved: ${utils.renderDate(indent.approvedAt)}</p>` : ''}
                         </div>
-                        <h4 class="text-primary">Date: ${utils.renderDate(indent.indentDate) || utils.renderDate(indent.createdAt)}</h4>
-                        ${indent.approvedAt ? `<p class="text-[10px] text-muted-foreground mt-1">Approved: ${utils.renderDate(indent.approvedAt)}</p>` : ''}
                     </div>
-                    ${indent.status !== 'approved' ? `<span class="status-tag ${indent.status}">${indent.status.toUpperCase()}</span>` : ''}
-                </div>
-                <div class="material-summary mt-3 space-y-3">
-                    ${(() => {
+                    <div class="material-summary mt-3 space-y-3">
+                        ${(() => {
                 const gatePasses = storage.get('gate_passes');
                 return indent.items.map(item => {
-                    const initialQty = item.initialQuantity || item.quantity;
-                    const remainingQty = item.quantity;
+                    const normalize = (s) => {
+                        if (!s) return '';
+                        const lastColonIndex = s.lastIndexOf(':');
+                        const namePart = lastColonIndex !== -1 ? s.substring(lastColonIndex + 1) : s;
+                        return namePart.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                    };
+
+                    // Find Gate Passes that used this specific item from this indent to calculate true initial qty if missing
+                    let totalFromPasses = 0;
+                    gatePasses.forEach(gp => {
+                        gp.items.forEach(gi => {
+                            const cleanGPItem = normalize(gi.item);
+                            const cleanIndentItem = normalize(item.item);
+                            if (gi.indentId === indent.id && (cleanGPItem === cleanIndentItem || cleanGPItem.includes(cleanIndentItem) || cleanIndentItem.includes(cleanGPItem))) {
+                                totalFromPasses += (parseInt(gi.quantity) || 0);
+                            }
+                        });
+                    });
+
+                    const remainingQty = parseInt(item.quantity) || 0;
+                    const initialQty = item.initialQuantity !== undefined ? (parseInt(item.initialQuantity) || 0) : (remainingQty + totalFromPasses);
                     const usedQty = initialQty - remainingQty;
                     const isCompleted = remainingQty <= 0;
                     const unit = utils.getUnit(item.item);
 
-                    // Find Gate Passes that used this specific item from this indent
                     const linkedPasses = [];
                     gatePasses.forEach(gp => {
                         gp.items.forEach(gi => {
-                            if (gi.indentId === indent.id && (gi.item.toLowerCase() === item.item.toLowerCase() || item.item.toLowerCase().includes(gi.item.toLowerCase()))) {
+                            const cleanGPItem = normalize(gi.item);
+                            const cleanIndentItem = normalize(item.item);
+                            if (gi.indentId === indent.id && (cleanGPItem === cleanIndentItem || cleanGPItem.includes(cleanIndentItem) || cleanIndentItem.includes(cleanGPItem))) {
                                 if (gi.distributions) {
                                     gi.distributions.forEach(d => {
                                         linkedPasses.push({
@@ -78,79 +98,70 @@ const indentsModule = {
                     });
 
                     return `
-                                <div class="indent-item-box">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div class="flex flex-col">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <span class="text-lg font-black ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-100'}">${item.item}</span>
-                                                ${!isCompleted && (usedQty / initialQty) >= 0.8 ? `
-                                                    <span class="usage-warning-badge pulse-warning" title="High Usage Alert: 80% or more used">
-                                                        <i data-lucide="alert-triangle" size="12"></i> ATTENTION
-                                                    </span>
-                                                ` : ''}
+                                    <div class="indent-item-box">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div class="flex flex-col">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <span class="text-lg font-black ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-100'}">${item.item}</span>
+                                                    ${!isCompleted && (usedQty / initialQty) >= 0.8 ? `
+                                                        <span class="usage-warning-badge pulse-warning" title="High Usage Alert: 80% or more used">
+                                                            <i data-lucide="alert-triangle" size="12"></i> ATTENTION
+                                                        </span>
+                                                    ` : ''}
+                                                </div>
                                             </div>
-                                        </div>
                                         </div>
                                         <div class="mt-6 bg-slate-900/40 rounded-2xl border border-white/5 overflow-hidden">
                                             <div class="p-4 border-b border-white/5 flex items-center bg-slate-800/10 gap-3">
                                                 <span class="w-24 text-[9px] text-slate-500 uppercase font-black tracking-widest">Purchased</span>
-                                                <div class="flex items-baseline">
+                                                <div>
                                                     <span class="text-xl text-slate-100 font-black">: ${initialQty}</span>
-                                                    <span class="text-xs text-slate-600 font-bold italic ml-2">&nbsp; ${unit}</span>
+                                                    <span class="text-xs text-slate-600 font-bold italic ml-1">${unit}</span>
                                                 </div>
                                             </div>
-                                            
-                                            <div class="p-4 border-b border-white/5 flex items-center bg-accent/5 gap-3">
-                                                <span class="w-24 text-[9px] text-accent/60 uppercase font-black tracking-widest">Received</span>
-                                                <div class="flex items-baseline">
-                                                    <span class="text-xl text-accent font-black">: ${usedQty}</span>
-                                                    <span class="text-xs text-accent/50 font-bold italic ml-2">&nbsp; ${unit}</span>
-                                                </div>
-                                            </div>
-                                            
                                             <div class="p-4 flex items-center bg-indigo-500/5 gap-3">
-                                                <span class="w-24 text-[9px] text-indigo-400/70 uppercase font-black tracking-widest">Sec Store</span>
+                                                <span class="w-24 text-[9px] text-indigo-400/70 uppercase font-black tracking-widest">Section Store</span>
                                                 <div class="flex items-baseline">
                                                     <span class="text-xl text-indigo-300 font-black">: ${initialQty - usedQty}</span>
                                                     <span class="text-xs text-indigo-400/50 font-bold italic ml-2">&nbsp; ${unit}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    ${linkedPasses.length > 0 ? `
-                                        <div class="usage-breakdown-container mt-3">
-                                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2 flex items-center gap-2">
-                                                <i data-lucide="activity" size="12"></i> Gate Pass Usage Breakdown:
-                                            </p>
-                                            <div class="space-y-1.5">
-                                                ${linkedPasses.map(lp => `
-                                                    <div class="flex justify-between items-center text-[11px] bg-black/10 p-2 rounded-md border border-slate-700/30">
-                                                        <span class="text-slate-400">GP: <span class="text-slate-200 font-semibold">${lp.no}</span> (${lp.quarter})</span>
-                                                        <span class="text-accent font-bold"> : ${lp.qty} ${unit}</span>
-                                                    </div>
-                                                `).join('')}
+                                        ${linkedPasses.length > 0 ? `
+                                            <div class="mt-4 pt-3 border-t border-slate-700/30">
+                                                <p class="text-[9px] uppercase font-black text-primary/60 mb-2 flex items-center gap-1.5 px-1">
+                                                    <i data-lucide="history" size="10"></i> Gate Pass Usage Breakdown:
+                                                </p>
+                                                <div class="space-y-1.5">
+                                                    ${linkedPasses.map(lp => `
+                                                        <div class="flex justify-between items-center text-[11px] bg-slate-900/50 p-2 rounded border border-white/5">
+                                                            <span class="text-slate-400">GP: <strong class="text-slate-200">${lp.no}</strong> <span class="text-[9px] opacity-60 ml-1">(${lp.quarter})</span></span>
+                                                            <span class="text-accent font-black"> : ${lp.qty} ${unit}</span>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `;
+                                        ` : ''}
+                                    </div>
+                                `;
                 }).join('');
             })()}
+                    </div>
+                    ${indent.attachment ? `
+                        <div class="mt-2 pt-2 border-t border-slate-700/50">
+                            <button onclick="indentsModule.viewAttachment('${indent.attachment.replace(/'/g, "\\'")}')" class="attachment-link border-0 bg-transparent cursor-pointer p-0">
+                                <i data-lucide="eye" size="12"></i> View Attachment
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${indent.status === 'pending' ? `
+                        <div class="mt-3 flex gap-2">
+                            <button onclick="indentsModule.deleteIndent('${indent.id}')" class="btn-sm btn-outline text-error">Cancel</button>
+                            ${auth.isOwner() ? `<button onclick="indentsModule.approveIndent('${indent.id}')" class="btn-sm btn-accent">Approve</button>` : ''}
+                        </div>
+                    ` : ''}
                 </div>
-                ${indent.attachment ? `
-                    <div class="mt-2 pt-2 border-t border-slate-700/50">
-                        <button onclick="indentsModule.viewAttachment('${indent.attachment.replace(/'/g, "\\'")}')" class="attachment-link border-0 bg-transparent cursor-pointer p-0">
-                            <i data-lucide="eye" size="12"></i> View Attachment
-                        </button>
-                    </div>
-                ` : ''}
-                ${indent.status === 'pending' ? `
-                    <div class="mt-3 flex gap-2">
-                        <button onclick="indentsModule.deleteIndent('${indent.id}')" class="btn-sm btn-outline text-error">Cancel</button>
-                        ${auth.isOwner() ? `<button onclick="indentsModule.approveIndent('${indent.id}')" class="btn-sm btn-accent">Approve</button>` : ''}
-                    </div>
-                ` : ''}
+                <div class="h-1 w-24 bg-slate-800/50 mx-auto rounded-full mb-12"></div>
             </div>
         `).join('');
     },
@@ -208,7 +219,7 @@ const indentsModule = {
     addMaterialRow() {
         const section = document.getElementById('indent-items');
         const row = document.createElement('div');
-        row.className = 'material-row flex gap-2 items-center';
+        row.className = 'gate-item-row bg-slate-800/40 border-2 border-slate-700/60 rounded-3xl p-6 mb-10 relative shadow-2xl flex gap-2 items-center';
         row.innerHTML = `
             <div class="flex-1">
                 <select class="material-select w-full" onchange="indentsModule.onMaterialChange(this)">
@@ -237,9 +248,54 @@ const indentsModule = {
 
         if (category) {
             container.innerHTML = `
-                <select class="sub-material-select w-full">
+                <select class="sub-material-select w-full" onchange="indentsModule.onSubMaterialChange(this, '${categoryName}')">
                     <option value="">Select Item...</option>
                     ${category.items.map(i => `<option value="${i}">${i}</option>`).join('')}
+                </select>
+                <div class="extra-options mt-1"></div>
+            `;
+        } else {
+            container.innerHTML = '';
+        }
+    },
+
+    onSubMaterialChange(select, categoryName) {
+        const container = select.nextElementSibling;
+        const item = select.value;
+        const category = DATA.materials.find(m => m.name === categoryName);
+
+        if (categoryName === 'Starters' && item) {
+            if (item === 'DOL Starter') {
+                container.innerHTML = `
+                    <select class="phase-select w-full" onchange="indentsModule.onPhaseChange(this, 'Starters', 'DOL Starter')">
+                        <option value="">Select Phase...</option>
+                        ${category.phases.map(p => `<option value="${p}">${p}</option>`).join('')}
+                    </select>
+                    <div class="rating-container mt-1"></div>
+                `;
+            } else if (item === 'Star Delta Starter') {
+                container.innerHTML = `
+                    <select class="rating-select w-full">
+                        <option value="">Select Rating...</option>
+                        ${category.ratings['Star Delta Starter'].map(r => `<option value="${r}">${r}</option>`).join('')}
+                    </select>
+                `;
+            }
+        } else {
+            container.innerHTML = '';
+        }
+    },
+
+    onPhaseChange(select, categoryName, subItem) {
+        const container = select.nextElementSibling;
+        const phase = select.value;
+        const category = DATA.materials.find(m => m.name === categoryName);
+
+        if (phase && category.ratings[subItem]) {
+            container.innerHTML = `
+                <select class="rating-select w-full">
+                    <option value="">Select Rating...</option>
+                    ${category.ratings[subItem].map(r => `<option value="${r}">${r}</option>`).join('')}
                 </select>
             `;
         } else {
@@ -249,6 +305,7 @@ const indentsModule = {
 
     async submitIndent() {
         const indentNumber = document.getElementById('indent-no').value;
+        // ... (rest of the code needs to handle the nested inputs)
         const indentDate = document.getElementById('indent-date').value;
         const type = document.getElementById('indent-type').value;
         const fileInput = document.getElementById('indent-attachment');
@@ -262,9 +319,22 @@ const indentsModule = {
         const items = rows.map(row => {
             const category = row.querySelector('.material-select').value;
             const subSelect = row.querySelector('.sub-material-select');
+            const phaseSelect = row.querySelector('.phase-select');
+            const ratingSelect = row.querySelector('.rating-select');
+
             const item = subSelect ? subSelect.value : null;
+            const phase = phaseSelect ? phaseSelect.value : null;
+            const rating = ratingSelect ? ratingSelect.value : null;
             const quantity = parseInt(row.querySelector('.qty-input').value);
-            return { category, item, quantity, initialQuantity: quantity };
+
+            let finalItem = item;
+            if (phase && rating) {
+                finalItem = `${item} (${phase} - ${rating})`;
+            } else if (rating) {
+                finalItem = `${item} (${rating})`;
+            }
+
+            return { category, item: finalItem, quantity, initialQuantity: quantity };
         }).filter(i => i.category && i.item);
 
         if (items.length === 0) {
@@ -329,14 +399,35 @@ const indentsModule = {
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += "Indent No,Date of Received (Approved),Item Name,Purchased Qty,Gatepass No,Used Quarter,Used Qty\n";
 
+        const normalize = (s) => {
+            if (!s) return '';
+            const lastColonIndex = s.lastIndexOf(':');
+            const namePart = lastColonIndex !== -1 ? s.substring(lastColonIndex + 1) : s;
+            return namePart.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+        };
+
         indent.items.forEach(item => {
-            const initialQty = item.initialQuantity || item.quantity;
+            // Find total received from passes for initial qty calculation
+            let totalFromPasses = 0;
+            gatePasses.forEach(gp => {
+                gp.items.forEach(gi => {
+                    const cleanGPItem = normalize(gi.item);
+                    const cleanIndentItem = normalize(item.item);
+                    if (gi.indentId === indent.id && (cleanGPItem === cleanIndentItem || cleanGPItem.includes(cleanIndentItem) || cleanIndentItem.includes(cleanGPItem))) {
+                        totalFromPasses += (parseInt(gi.quantity) || 0);
+                    }
+                });
+            });
+
+            const remainingQty = parseInt(item.quantity) || 0;
+            const initialQty = item.initialQuantity !== undefined ? (parseInt(item.initialQuantity) || 0) : (remainingQty + totalFromPasses);
             let hasGP = false;
 
             gatePasses.forEach(gp => {
                 gp.items.forEach(gi => {
-                    // Match by indentId and item name (normalization not strictly needed here as we use indentId)
-                    if (gi.indentId === indent.id && (gi.item.toLowerCase().includes(item.item.toLowerCase()) || item.item.toLowerCase().includes(gi.item.toLowerCase()))) {
+                    const cleanGPItem = normalize(gi.item);
+                    const cleanIndentItem = normalize(item.item);
+                    if (gi.indentId === indent.id && (cleanGPItem === cleanIndentItem || cleanGPItem.includes(cleanIndentItem) || cleanIndentItem.includes(cleanGPItem))) {
                         hasGP = true;
                         const dists = gi.distributions || [{ quarter: gi.quarter || 'N/A', quantity: gi.quantity }];
                         dists.forEach(d => {
@@ -369,6 +460,13 @@ const indentsModule = {
         const gatePasses = storage.get('gate_passes');
         const approvalDate = indent.approvedAt ? utils.renderDate(indent.approvedAt) : 'N/A';
 
+        const normalize = (s) => {
+            if (!s) return '';
+            const lastColonIndex = s.lastIndexOf(':');
+            const namePart = lastColonIndex !== -1 ? s.substring(lastColonIndex + 1) : s;
+            return namePart.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+        };
+
         const modalHtml = `
             <div id="indent-details-modal" class="overlay">
                 <div class="overlay-content !max-w-xl !w-full !p-6 max-h-[90vh] overflow-y-auto">
@@ -384,11 +482,27 @@ const indentsModule = {
 
                     <div class="space-y-6 text-left">
                         ${indent.items.map(item => {
-            const initialQty = item.initialQuantity || item.quantity;
+            // Find total received from passes for initial qty calculation
+            let totalFromPasses = 0;
+            gatePasses.forEach(gp => {
+                gp.items.forEach(gi => {
+                    const cleanGPItem = normalize(gi.item);
+                    const cleanIndentItem = normalize(item.item);
+                    if (gi.indentId === indent.id && (cleanGPItem === cleanIndentItem || cleanGPItem.includes(cleanIndentItem) || cleanIndentItem.includes(cleanGPItem))) {
+                        totalFromPasses += (parseInt(gi.quantity) || 0);
+                    }
+                });
+            });
+
+            const remainingQty = parseInt(item.quantity) || 0;
+            const initialQty = item.initialQuantity !== undefined ? (parseInt(item.initialQuantity) || 0) : (remainingQty + totalFromPasses);
+
             const linkedData = [];
             gatePasses.forEach(gp => {
                 gp.items.forEach(gi => {
-                    if (gi.indentId === indent.id && (gi.item.toLowerCase().includes(item.item.toLowerCase()) || item.item.toLowerCase().includes(gi.item.toLowerCase()))) {
+                    const cleanGPItem = normalize(gi.item);
+                    const cleanIndentItem = normalize(item.item);
+                    if (gi.indentId === indent.id && (cleanGPItem === cleanIndentItem || cleanGPItem.includes(cleanIndentItem) || cleanIndentItem.includes(cleanGPItem))) {
                         const dists = gi.distributions || [{ quarter: gi.quarter || 'N/A', quantity: gi.quantity }];
                         dists.forEach(d => {
                             linkedData.push({

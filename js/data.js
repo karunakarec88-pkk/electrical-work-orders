@@ -130,6 +130,16 @@ const DATA = {
             name: 'Exhaust Fan',
             items: ['Light duty 300 MM [Metal]', 'Heavy Duty 300 MM [Metal]'],
             unit: 'Nos'
+        },
+        {
+            name: 'Starters',
+            items: ['DOL Starter', 'Star Delta Starter'],
+            phases: ['Single Phase', 'Three Phase'],
+            ratings: {
+                'DOL Starter': ['0.5 HP Starter', '1 HP Starter', '2 HP Starter', '7.5 HP Starter', '10 HP Starter'],
+                'Star Delta Starter': ['15 HP Starter', '25 HP Starter']
+            },
+            unit: 'Nos'
         }
     ]
 };

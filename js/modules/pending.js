@@ -196,6 +196,26 @@ const pendingModule = {
                     ${category.companies.map(c => `<option value="${c}" ${c === ratingValue ? 'selected' : ''}>${c}</option>`).join('')}
                 </select>
             `;
+        } else if (category.name === 'Starters' && item) {
+            if (item === 'DOL Starter') {
+                configHtml = `
+                    <select class="rating-select mt-2" onchange="pendingModule.updateTempItem('${category.name}', '${item}', null, null, this.value)">
+                        <option value="">Phase...</option>
+                        ${category.phases.map(p => `<option value="${p}" ${p === existing?.phase ? 'selected' : ''}>${p}</option>`).join('')}
+                    </select>
+                    <select class="rating-select mt-1" onchange="pendingModule.updateTempItem('${category.name}', '${item}', null, this.value)">
+                        <option value="">Rating...</option>
+                        ${category.ratings['DOL Starter'].map(r => `<option value="${r}" ${r === ratingValue ? 'selected' : ''}>${r}</option>`).join('')}
+                    </select>
+                `;
+            } else if (item === 'Star Delta Starter') {
+                configHtml = `
+                    <select class="rating-select mt-2" onchange="pendingModule.updateTempItem('${category.name}', '${item}', null, this.value)">
+                        <option value="">Rating...</option>
+                        ${category.ratings['Star Delta Starter'].map(r => `<option value="${r}" ${r === ratingValue ? 'selected' : ''}>${r}</option>`).join('')}
+                    </select>
+                `;
+            }
         }
 
         return `
@@ -213,7 +233,7 @@ const pendingModule = {
         `;
     },
 
-    updateTempItem(categoryName, item, delta, newRating) {
+    updateTempItem(categoryName, item, delta, newRating, newPhase) {
         let existingIndex = this.tempMaterials.findIndex(m => m.category === categoryName && m.baseItem === item);
 
         if (existingIndex === -1) {
@@ -223,15 +243,24 @@ const pendingModule = {
                 baseItem: item,
                 item: item,
                 quantity: 0,
-                rating: ''
+                rating: '',
+                phase: ''
             });
             existingIndex = this.tempMaterials.length - 1;
         }
 
         const m = this.tempMaterials[existingIndex];
         if (delta !== null) m.quantity = Math.max(0, m.quantity + delta);
-        if (newRating !== undefined) m.rating = newRating;
-        m.item = m.rating ? `${m.baseItem} (${m.rating})` : m.baseItem;
+        if (newRating !== undefined && newRating !== null) m.rating = newRating;
+        if (newPhase !== undefined && newPhase !== null) m.phase = newPhase;
+
+        if (m.phase && m.rating) {
+            m.item = `${m.baseItem} (${m.phase} - ${m.rating})`;
+        } else if (m.rating) {
+            m.item = `${m.baseItem} (${m.rating})`;
+        } else {
+            m.item = m.baseItem;
+        }
 
         const row = document.querySelector(`.picker-item-row[data-cat="${categoryName}"][data-item="${item}"]`);
         if (row) row.querySelector('.qty-input-bulk').value = m.quantity;

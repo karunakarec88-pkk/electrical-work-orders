@@ -149,14 +149,22 @@ const completedModule = {
         const container = select.nextElementSibling;
 
         if (category) {
-            // Check if existing item has rating in brackets
+            // Check if existing item has properties in brackets
             let cleanItem = existingData ? existingData.item : null;
             let existingRating = null;
+            let existingPhase = null;
+
             if (cleanItem && cleanItem.includes('(')) {
                 const match = cleanItem.match(/(.+)\s\((.+)\)/);
                 if (match) {
                     cleanItem = match[1].trim();
-                    existingRating = match[2].trim();
+                    const details = match[2].split(' - ');
+                    if (details.length > 1) {
+                        existingPhase = details[0].trim();
+                        existingRating = details[1].trim();
+                    } else {
+                        existingRating = details[0].trim();
+                    }
                 }
             }
 
@@ -170,14 +178,14 @@ const completedModule = {
             container.innerHTML = html;
 
             if (cleanItem) {
-                this.onSubMaterialChange(container.querySelector('.sub-material-select'), categoryName, existingRating);
+                this.onSubMaterialChange(container.querySelector('.sub-material-select'), categoryName, existingRating, existingPhase);
             }
         } else {
             container.innerHTML = '';
         }
     },
 
-    onSubMaterialChange(select, categoryName, existingRating = null) {
+    onSubMaterialChange(select, categoryName, existingRating = null, existingPhase = null) {
         const container = select.nextElementSibling;
         const item = select.value;
         const category = DATA.materials.find(m => m.name === categoryName);
@@ -198,6 +206,43 @@ const completedModule = {
                 <select class="rating-select">
                     <option value="">Company...</option>
                     ${category.companies.map(c => `<option value="${c}" ${existingRating === c ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
+            `;
+        } else if (categoryName === 'Starters' && item) {
+            if (item === 'DOL Starter') {
+                container.innerHTML = `
+                    <select class="phase-select" onchange="completedModule.onPhaseChange(this, 'Starters', 'DOL Starter')">
+                        <option value="">Select Phase...</option>
+                        ${category.phases.map(p => `<option value="${p}" ${existingPhase === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    </select>
+                    <div class="final-rating-container"></div>
+                `;
+                if (existingPhase) {
+                    this.onPhaseChange(container.querySelector('.phase-select'), 'Starters', 'DOL Starter', existingRating);
+                }
+            } else if (item === 'Star Delta Starter') {
+                container.innerHTML = `
+                    <select class="rating-select">
+                        <option value="">Rating...</option>
+                        ${category.ratings['Star Delta Starter'].map(r => `<option value="${r}" ${existingRating === r ? 'selected' : ''}>${r}</option>`).join('')}
+                    </select>
+                `;
+            }
+        } else {
+            container.innerHTML = '';
+        }
+    },
+
+    onPhaseChange(select, categoryName, subItem, existingRating = null) {
+        const container = select.nextElementSibling;
+        const phase = select.value;
+        const category = DATA.materials.find(m => m.name === categoryName);
+
+        if (phase && category.ratings[subItem]) {
+            container.innerHTML = `
+                <select class="rating-select">
+                    <option value="">Rating...</option>
+                    ${category.ratings[subItem].map(r => `<option value="${r}" ${existingRating === r ? 'selected' : ''}>${r}</option>`).join('')}
                 </select>
             `;
         } else {
@@ -228,11 +273,22 @@ const completedModule = {
         const materialsUsed = noMaterial ? [] : Array.from(document.querySelectorAll('.material-row')).map(row => {
             const category = row.querySelector('.material-select').value;
             const subSelect = row.querySelector('.sub-material-select');
+            const phaseSelect = row.querySelector('.phase-select');
             const ratingSelect = row.querySelector('.rating-select');
+
             const item = subSelect ? subSelect.value : null;
+            const phase = phaseSelect ? phaseSelect.value : null;
             const rating = ratingSelect ? ratingSelect.value : null;
             const quantity = parseInt(row.querySelector('.qty-input').value);
-            return { category, item: rating ? `${item} (${rating})` : item, quantity };
+
+            let finalItem = item;
+            if (phase && rating) {
+                finalItem = `${item} (${phase} - ${rating})`;
+            } else if (rating) {
+                finalItem = `${item} (${rating})`;
+            }
+
+            return { category, item: finalItem, quantity };
         }).filter(m => m.category && m.item);
 
         if (!noMaterial && materialsUsed.length === 0) {

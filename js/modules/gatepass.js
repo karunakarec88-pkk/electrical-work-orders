@@ -134,9 +134,9 @@ const gatePassModule = {
                 </div>
 
                 <div class="flex justify-center mb-6">
-                    <button type="button" onclick="gatePassModule.addMaterialRow()" class="btn-primary-outline flex items-center gap-2">
-                        <i data-lucide="plus-circle" size="18"></i>
-                        Add Another Material
+                    <button type="button" onclick="gatePassModule.addMaterialRow()" class="flex items-center gap-2 px-6 py-3 bg-primary text-slate-900 font-black rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                        <i data-lucide="plus-circle" size="20"></i>
+                        ADD ANOTHER MATERIAL
                     </button>
                 </div>
 
@@ -159,92 +159,122 @@ const gatePassModule = {
         const section = document.getElementById('pass-items');
         const rowId = 'mat-' + this.rowCount + '-' + Date.now();
         const row = document.createElement('div');
-        row.className = 'gate-item-row mb-3';
+        row.className = 'gate-item-row bg-slate-800/40 border-2 border-slate-700/60 rounded-3xl p-6 mb-10 relative shadow-2xl';
         row.id = rowId;
 
         row.innerHTML = `
-            <!-- PRIMARY HEADER ROW -->
-            <div class="gate-row-header !h-auto py-2" style="margin-bottom: 20px;">
-                <!-- 1. Material (Flex: 1) -->
-                <div class="gate-col-mat">
-                    <input type="text" class="mat-name-input w-full bg-slate-800/40 border border-slate-700/50 text-[11px] font-bold text-slate-100 px-3 h-10 rounded-lg" placeholder="Tap to select material..." readonly onclick="gatePassModule.showMaterialPicker('${rowId}')">
-                </div>
-
-                <!-- 2. Qty Block (Shrink: 0) -->
-                <div class="gate-col-qty !w-24">
-                    <span class="text-[9px] text-slate-500 uppercase font-black">Quantity</span>
-                    <div class="flex items-center gap-1 mt-1">
-                        <button type="button" onclick="this.nextElementSibling.stepDown()" class="w-6 h-7 bg-black/20 rounded hover:bg-black/40 text-slate-400 text-[12px]">-</button>
-                        <input type="number" class="total-qty-input qty-input !w-8 !text-[12px] !h-7 font-bold text-primary bg-transparent text-center border-none focus:ring-0" value="1" min="1">
-                        <button type="button" onclick="this.previousElementSibling.stepUp()" class="w-6 h-7 bg-black/20 rounded hover:bg-black/40 text-slate-400 text-[12px]">+</button>
-                    </div>
-                </div>
-
-                <!-- Metadata Inputs -->
-                <input type="hidden" class="source-input" value="">
-                <input type="hidden" class="indent-id-input" value="">
-
-                <!-- 6. Delete Block -->
-                <div class="gate-col-delete">
-                    <button type="button" onclick="event.stopPropagation(); this.closest('.gate-item-row').remove()" class="text-slate-500 hover:text-error transition-colors p-2">
-                        <i data-lucide="trash-2" size="16"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- INDENT STATUS DISPLAY -->
-            <div class="px-2" style="margin-bottom: 25px;">
-                <div id="indent-status-${rowId}" class="flex items-center gap-2 py-2.5 px-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-all" onclick="gatePassModule.toggleIndentList('${rowId}')">
-                    <i data-lucide="plus-circle" size="14" class="text-indigo-400" id="status-icon-${rowId}"></i>
-                    <span class="text-[10px] text-indigo-100 font-bold" id="status-text-${rowId}">Add Indent</span>
-                    <span class="text-[8px] text-indigo-400 ml-auto uppercase font-black hover:underline" id="status-action-${rowId}">Select</span>
-                </div>
-            </div>
-
-            <!-- INDENT SELECTION AREA -->
-            <div class="px-2" style="margin-bottom: 20px;">
-                <div id="indent-selection-${rowId}" class="bg-indigo-500/10 rounded-lg border border-indigo-500/20 p-2 space-y-3 hidden shadow-inner" style="margin-top: 15px; margin-bottom: 15px;">
-                    <!-- Local Section -->
-                    <div>
-                        <div class="flex items-center gap-2 mb-1.5 opacity-80">
-                             <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                             <span class="text-[9px] text-slate-200 uppercase font-black tracking-wider">Local Indents</span>
-                        </div>
-                        <div class="local-list flex flex-wrap gap-2 min-h-[20px]"></div>
-                    </div>
-
-                    <!-- Gem Section -->
-                    <div>
-                        <div class="flex items-center gap-2 mb-1.5 opacity-80">
-                             <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                             <span class="text-[9px] text-slate-200 uppercase font-black tracking-wider">Gem Indents</span>
-                        </div>
-                        <div class="gem-list flex flex-wrap gap-2 min-h-[20px]"></div>
-                    </div>
-
-                    <!-- No Indent Section -->
-                    <div class="pt-1 border-t border-slate-700/30">
-                        <div id="no-indent-chip-${rowId}" onclick="gatePassModule.selectIndent('${rowId}', 'NO_INDENT', '')" 
-                             class="indent-chip w-full p-2 bg-slate-800 border border-slate-700 rounded cursor-pointer hover:border-slate-500 transition-all flex items-center justify-center gap-2">
-                             <i data-lucide="minus-circle" size="12" class="text-slate-500"></i>
-                             <span class="text-[10px] font-bold text-slate-300">No Indent (Material Available in Stock)</span>
+            <!-- MAIN MATERIAL CARD CONTENT -->
+            <div class="space-y-6">
+                <!-- 1. MATERIAL HEADER SECTION -->
+                <div class="flex flex-col sm:flex-row gap-4 items-start border-b border-white/5 pb-6">
+                    <div class="flex-1 w-full">
+                        <label class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1.5 block">Select Material</label>
+                        <div class="relative group" onclick="gatePassModule.showMaterialPicker('${rowId}')">
+                            <input type="text" class="mat-name-input w-full bg-slate-900/60 border-2 border-slate-700/50 text-sm font-bold text-slate-100 px-4 h-12 rounded-xl cursor-pointer hover:border-primary/50 transition-all shadow-inner" placeholder="Tap to search material..." readonly>
+                            <i data-lucide="chevron-down" size="16" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-primary transition-colors"></i>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- COLLAPSIBLE DETAILS -->
-            <div class="p-2" style="margin-top: 15px;">
-                <div class="distribution-section bg-black/10 rounded-lg p-2 border border-slate-700/20">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center gap-2">
-                             <i data-lucide="layout-grid" size="10" class="text-primary/70"></i>
-                             <h5 class="text-[9px] text-slate-400 uppercase font-black">Quarterly Distribution</h5>
+
+                    <div class="w-full sm:w-32 shrink-0">
+                        <label class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1.5 block">Total Qty</label>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="this.nextElementSibling.stepDown()" class="w-10 h-12 bg-slate-700/50 border border-slate-600/50 rounded-l-xl flex items-center justify-center hover:bg-slate-600 text-white font-black text-xl">-</button>
+                            <input type="number" class="total-qty-input qty-input w-12 h-12 font-black text-primary bg-slate-900/80 border-y border-slate-600/50 text-center focus:ring-0" value="1" min="1">
+                            <button type="button" onclick="this.previousElementSibling.stepUp()" class="w-10 h-12 bg-slate-700/50 border border-slate-600/50 rounded-r-xl flex items-center justify-center hover:bg-slate-600 text-white font-black text-xl">+</button>
                         </div>
-                        <button type="button" onclick="gatePassModule.addQuarterRow('${rowId}')" class="btn-micro bg-primary/20 text-primary border border-primary/30 rounded px-2 py-0.5 text-[8px] font-black uppercase">
-                            + ADD QTR
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="button" onclick="this.closest('.gate-item-row').remove()" class="w-10 h-10 rounded-full bg-error/10 text-error/60 hover:bg-error hover:text-white transition-all flex items-center justify-center shadow-lg shadow-error/10">
+                            <i data-lucide="trash-2" size="18"></i>
                         </button>
                     </div>
-                    <div class="distribution-rows space-y-1.5"></div>
+                </div>
+
+                <!-- 2. INDENT LINKING COMPARTMENT -->
+                <div class="bg-indigo-500/5 rounded-2xl border border-indigo-500/10 p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                             <div class="p-1.5 bg-indigo-500/20 rounded-lg">
+                                 <i data-lucide="link" size="14" class="text-indigo-400"></i>
+                             </div>
+                             <h5 class="text-[10px] text-indigo-300 uppercase font-black tracking-widest">Indent Source Connection</h5>
+                        </div>
+                        <span id="source-badge-${rowId}" class="text-[8px] px-2 py-0.5 rounded-full bg-slate-700 font-bold text-slate-400 uppercase tracking-tighter">Required</span>
+                    </div>
+
+                    <div id="indent-status-${rowId}" class="group relative bg-slate-900/80 border-2 border-dashed border-indigo-500/20 rounded-2xl p-4 cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all flex items-center justify-between" onclick="gatePassModule.toggleIndentList('${rowId}')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-lg group-hover:scale-110 transition-transform">
+                                <i data-lucide="plus" id="status-icon-${rowId}"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-black text-indigo-100 uppercase" id="status-text-${rowId}">Select Matching Indent</span>
+                                <span class="text-[9px] text-slate-500 font-bold" id="status-subtext-${rowId}">Linking is compulsory for Store items</span>
+                            </div>
+                        </div>
+                        <div class="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                            <i data-lucide="search" size="14"></i>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Inputs -->
+                    <input type="hidden" class="source-input" value="">
+                    <input type="hidden" class="indent-id-input" value="">
+
+                    <!-- EXPANDABLE INDENT REGISTRY -->
+                    <div id="indent-selection-${rowId}" class="mt-6 overflow-hidden hidden">
+                        <div class="bg-slate-900 border border-indigo-500/20 rounded-2xl shadow-2xl p-6 space-y-8">
+                            <!-- Local Registry -->
+                            <div class="registry-section">
+                                <div class="flex items-center justify-between mb-4 px-2">
+                                     <div class="flex items-center gap-2">
+                                         <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse"></div>
+                                         <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest">Local Procurement Database</span>
+                                     </div>
+                                     <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Records Below</span>
+                                </div>
+                                <div class="local-list flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 thin-scrollbar"></div>
+                            </div>
+
+                            <!-- Gem Registry -->
+                            <div class="registry-section pt-6 border-t border-white/5">
+                                <div class="flex items-center justify-between mb-4 px-2">
+                                     <div class="flex items-center gap-2">
+                                         <div class="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50 animate-pulse"></div>
+                                         <span class="text-[10px] text-blue-400 uppercase font-black tracking-widest">GeM Portal Registry</span>
+                                     </div>
+                                     <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Records Below</span>
+                                </div>
+                                <div class="gem-list flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 thin-scrollbar"></div>
+                            </div>
+
+                            <!-- Stock Fallback -->
+                            <div class="pt-6 border-t border-white/5">
+                                <div id="no-indent-chip-${rowId}" onclick="gatePassModule.selectIndent('${rowId}', 'NO_INDENT', '')" 
+                                     class="indent-chip w-full p-4 bg-slate-800 border-2 border-slate-700/50 rounded-2xl cursor-pointer hover:border-slate-300 transition-all flex items-center justify-center gap-3 group">
+                                     <i data-lucide="layers" size="16" class="text-slate-500 group-hover:text-primary"></i>
+                                     <span class="text-[11px] font-black text-slate-400 group-hover:text-white uppercase tracking-widest">Direct Stock Entry (No Matching Indent)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. QUARTERLY DISTRIBUTION SECTION -->
+                <div class="bg-primary/5 rounded-2xl border border-primary/10 p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                             <div class="p-1.5 bg-primary/20 rounded-lg">
+                                 <i data-lucide="calendar" size="14" class="text-primary"></i>
+                             </div>
+                             <h5 class="text-[10px] text-primary uppercase font-black tracking-widest">Quarterly Allocation</h5>
+                        </div>
+                        <button type="button" onclick="gatePassModule.addQuarterRow('${rowId}')" class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/20 text-primary border border-primary/30 rounded-lg text-[10px] font-black uppercase hover:bg-primary hover:text-slate-900 transition-colors">
+                            <i data-lucide="plus" size="10"></i> Add Allocation
+                        </button>
+                    </div>
+                    <div class="distribution-rows space-y-3"></div>
                 </div>
             </div>
         `;
@@ -278,9 +308,11 @@ const gatePassModule = {
             <!-- 2. Qty Block -->
             <div class="qtr-col-qty" style="flex-shrink: 0;">
                 <span class="text-[8px] text-slate-500 uppercase font-black">Qty</span>
-                <button type="button" onclick="this.nextElementSibling.stepDown()" class="w-5 h-6 flex items-center justify-center bg-black/20 rounded hover:bg-black/40 text-slate-400 text-[10px]">-</button>
-                <input type="number" class="qtr-qty-input qty-input !w-7 !text-[11px] !h-6 font-bold text-primary bg-transparent text-center border-none focus:ring-0" value="1" min="1">
-                <button type="button" onclick="this.previousElementSibling.stepUp()" class="w-5 h-6 flex items-center justify-center bg-black/20 rounded hover:bg-black/40 text-slate-400 text-[10px]">+</button>
+                <div class="flex items-center gap-1">
+                    <button type="button" onclick="this.nextElementSibling.stepDown()" class="w-5 h-6 flex items-center justify-center bg-primary rounded hover:bg-primary/80 text-slate-900 font-black text-xs">-</button>
+                    <input type="number" class="qtr-qty-input qty-input !w-8 !text-[11px] !h-6 font-black text-primary bg-slate-900/40 rounded text-center border-none focus:ring-0" value="1" min="1">
+                    <button type="button" onclick="this.previousElementSibling.stepUp()" class="w-5 h-6 flex items-center justify-center bg-primary rounded hover:bg-primary/80 text-slate-900 font-black text-xs">+</button>
+                </div>
             </div>
 
             <!-- 3. Delete Block -->
@@ -297,14 +329,16 @@ const gatePassModule = {
     },
 
     toggleIndentList(rowId) {
-        const row = document.getElementById(rowId);
         const list = document.getElementById(`indent-selection-${rowId}`);
         if (!list) return;
 
         const isHidden = list.classList.contains('hidden');
         if (isHidden) {
             list.classList.remove('hidden');
-            this.renderCategorizedIndents(rowId);
+            // Add a small delay to ensure icons are created after layout
+            setTimeout(() => {
+                this.renderCategorizedIndents(rowId);
+            }, 10);
         } else {
             list.classList.add('hidden');
         }
@@ -324,15 +358,63 @@ const gatePassModule = {
         const localIndents = allIndents.filter(i => i.type === 'LOCAL');
         const gemIndents = allIndents.filter(i => i.type === 'GEM');
 
-        const renderChip = (indent, source) => `
-            <div data-id="${indent.id}" data-source="${source}" onclick="gatePassModule.selectIndent('${rowId}', '${source}', '${indent.id}', '${indent.indentNumber}')" 
-                 class="indent-chip p-2 bg-slate-800 border border-slate-700 rounded cursor-pointer hover:border-indigo-500/50 transition-all min-w-[100px]">
-                <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-slate-200">#${indent.indentNumber}</span>
-                    <span class="text-[8px] text-slate-500">${utils.renderDate(indent.indentDate)}</span>
+        const renderChip = (indent, source) => {
+            // Split items into bullet points for better readability
+            const itemsList = indent.items.map(i => `
+                <div class="flex items-center gap-3 text-[12px] text-slate-100 font-bold mb-1.5 p-2 bg-slate-800/60 rounded-lg border border-white/5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-primary/60 shadow-lg shadow-primary/30"></div>
+                    <span class="flex-1">${i.item}</span>
+                    <span class="text-primary font-black">Qty: ${i.quantity}</span>
                 </div>
-            </div>
-        `;
+            `).join('');
+
+            return `
+                <div data-id="${indent.id}" data-source="${source}" onclick="gatePassModule.selectIndent('${rowId}', '${source}', '${indent.id}', '${indent.indentNumber}')" 
+                     class="indent-chip group bg-[#111827] border-2 border-slate-700/50 rounded-2xl overflow-hidden hover:border-primary transition-all cursor-pointer mb-6 shadow-2xl">
+                    
+                    <!-- Box Header (Vertical Stack) -->
+                    <div class="px-5 py-5 bg-slate-800/40 border-b border-slate-700/50 flex flex-col gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 bg-primary/10 rounded border border-primary/20">
+                                <i data-lucide="hash" size="12" class="text-primary"></i>
+                            </div>
+                            <span class="text-[12px] font-black text-white uppercase tracking-tight">Indent: #${indent.indentNumber}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 bg-slate-700/30 rounded border border-white/5">
+                                <i data-lucide="globe" size="12" class="text-slate-400"></i>
+                            </div>
+                            <span class="text-[12px] text-slate-100 font-bold uppercase tracking-widest">${source}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 bg-slate-700/30 rounded border border-white/5">
+                                <i data-lucide="calendar" size="12" class="text-slate-400"></i>
+                            </div>
+                            <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest">${utils.renderDate(indent.indentDate)}</span>
+                        </div>
+                    </div>
+
+                    <!-- Box Content -->
+                    <div class="p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="package" size="14" class="text-primary/70"></i>
+                            <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest">Included Materials</p>
+                        </div>
+                        <div class="space-y-1 mb-5">
+                            ${itemsList}
+                        </div>
+                        
+                        <!-- Select Button -->
+                        <div class="mt-2 pt-4 border-t border-slate-700/30 flex justify-center">
+                            <button type="button" class="w-full text-[11px] bg-primary/10 text-primary border-2 border-primary/20 py-2.5 rounded-xl font-black uppercase group-hover:bg-primary group-hover:text-slate-900 group-hover:border-primary transition-all flex items-center justify-center gap-2 shadow-lg">
+                                <i data-lucide="check-circle" size="14"></i>
+                                Link This Indent
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
 
         localList.innerHTML = localIndents.length > 0 ? localIndents.map(i => renderChip(i, 'LOCAL')).join('') :
             `<div class="text-[8px] text-slate-600 italic py-1">No Local Indents</div>`;
@@ -351,30 +433,38 @@ const gatePassModule = {
 
         // Update Status Display
         const statusText = document.getElementById(`status-text-${rowId}`);
+        const statusSubtext = document.getElementById(`status-subtext-${rowId}`);
         const statusIcon = document.getElementById(`status-icon-${rowId}`);
-        const statusAction = document.getElementById(`status-action-${rowId}`);
+        const sourceBadge = document.getElementById(`source-badge-${rowId}`);
         const statusContainer = document.getElementById(`indent-status-${rowId}`);
 
-        // Reset classes first to avoid accumulation
-        statusContainer.classList.remove('bg-indigo-500/10', 'border-indigo-500/20', 'bg-emerald-500/10', 'border-emerald-500/20', 'bg-blue-500/10', 'border-blue-500/20');
+        // Reset classes
+        statusContainer.classList.remove('border-dashed', 'border-indigo-500/20', 'bg-slate-900/80', 'bg-emerald-500/10', 'border-emerald-500/30', 'bg-blue-500/10', 'border-blue-500/30', 'bg-indigo-500/10', 'border-indigo-500/30');
+        sourceBadge.classList.remove('bg-slate-700', 'text-slate-400', 'bg-emerald-500', 'text-white', 'bg-blue-500', 'bg-indigo-500');
 
         if (source === 'NO_INDENT') {
-            statusText.textContent = 'Stock Record (No Indent)';
-            statusIcon.innerHTML = `<i data-lucide="package-check" size="14" class="text-emerald-400"></i>`;
-            statusAction.textContent = 'Change';
-            statusContainer.classList.add('bg-emerald-500/10', 'border-emerald-500/20');
+            statusText.textContent = 'Direct Stock (No Indent)';
+            statusSubtext.textContent = 'Material will be taken from store stock';
+            statusIcon.className = 'text-emerald-400';
+            statusIcon.setAttribute('data-lucide', 'layers');
+            statusContainer.classList.add('bg-emerald-500/10', 'border-emerald-500/30');
+            sourceBadge.textContent = 'STOCK ENTRY';
+            sourceBadge.classList.add('bg-emerald-500', 'text-white');
         } else {
             statusText.textContent = `Linked to Indent #${indentNumber}`;
-            statusIcon.innerHTML = `<i data-lucide="link-2" size="14" class="text-blue-400"></i>`;
-            statusAction.textContent = 'Change';
-            statusContainer.classList.add('bg-blue-500/10', 'border-blue-500/20');
+            statusSubtext.textContent = `Source: ${source} PROCUREMENT`;
+            statusIcon.className = source === 'GEM' ? 'text-blue-400' : 'text-indigo-400';
+            statusIcon.setAttribute('data-lucide', 'file-check');
+            statusContainer.classList.add(source === 'GEM' ? 'bg-blue-500/10' : 'bg-indigo-500/10', source === 'GEM' ? 'border-blue-500/30' : 'border-indigo-500/30');
+            sourceBadge.textContent = source;
+            sourceBadge.classList.add(source === 'GEM' ? 'bg-blue-500' : 'bg-indigo-500', 'text-white');
         }
         lucide.createIcons();
 
-        // Hide the selection list
-        document.getElementById(`indent-selection-${rowId}`).classList.add('hidden');
+        // Hide list
+        this.toggleIndentList(rowId);
 
-        // Handle Chip Highlighting (Indent Chips)
+        // Update active states
         row.querySelectorAll('.indent-chip').forEach(chip => {
             if (chip.dataset.id === indentId && indentId !== '') {
                 chip.classList.add('active', '!border-indigo-500', '!bg-indigo-500/20');
@@ -383,12 +473,11 @@ const gatePassModule = {
             }
         });
 
-        // Handle No Indent Chip specifically
         const noIndentChip = document.getElementById(`no-indent-chip-${rowId}`);
         if (source === 'NO_INDENT') {
-            noIndentChip.classList.add('active', '!border-slate-400', '!bg-slate-700');
+            noIndentChip.classList.add('active', '!border-emerald-500', '!bg-emerald-500/20');
         } else {
-            noIndentChip.classList.remove('active', '!border-slate-400', '!bg-slate-700');
+            noIndentChip.classList.remove('active', '!border-emerald-500', '!bg-emerald-500/20');
         }
     },
 
@@ -446,14 +535,33 @@ const gatePassModule = {
             if (indentId) {
                 const indent = indentsToUpdate.find(i => i.id === indentId);
                 if (indent) {
-                    const indentItem = indent.items.find(ii =>
-                        ii.item.toLowerCase().includes(item.toLowerCase()) ||
-                        item.toLowerCase().includes(ii.item.toLowerCase())
-                    );
+                    const normalize = (s) => {
+                        if (!s) return '';
+                        // Remove EVERYTHING before and including the last colon (category prefix)
+                        const lastColonIndex = s.lastIndexOf(':');
+                        const namePart = lastColonIndex !== -1 ? s.substring(lastColonIndex + 1) : s;
+                        // Aggressive normalization: lowercase and remove all non-alphanumeric
+                        return namePart.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                    };
+
+                    const cleanMat = normalize(item);
+
+                    const indentItem = indent.items.find(ii => {
+                        const cleanIndentItem = normalize(ii.item);
+                        // True equality or inclusion for robust matching
+                        return cleanIndentItem === cleanMat || cleanIndentItem.includes(cleanMat) || cleanMat.includes(cleanIndentItem);
+                    });
+
                     if (indentItem) {
-                        indentItem.quantity = Math.max(0, indentItem.quantity - totalQuantity);
-                        const allReceived = indent.items.every(ii => ii.quantity <= 0);
-                        if (allReceived) indent.status = 'received';
+                        const qToDeduct = parseInt(totalQuantity) || 0;
+                        if (indentItem.initialQuantity === undefined) {
+                            indentItem.initialQuantity = parseInt(indentItem.quantity) || 0;
+                        }
+                        indentItem.quantity = Math.max(0, (parseInt(indentItem.quantity) || 0) - qToDeduct);
+
+                        // Check if entire indent is now fulfilled
+                        const allFulfilled = indent.items.every(ii => (parseInt(ii.quantity) || 0) <= 0);
+                        if (allFulfilled) indent.status = 'received';
                     }
                 }
             }
@@ -544,8 +652,73 @@ const gatePassModule = {
     selectMaterial(rowId, category, material) {
         const row = document.getElementById(rowId);
         if (row) {
-            row.querySelector('.mat-name-input').value = `${category} : ${material}`;
+            if (category === 'Starters') {
+                this.showStarterOptions(rowId, material);
+            } else {
+                row.querySelector('.mat-name-input').value = `${category} : ${material}`;
+                document.getElementById('material-picker-modal').remove();
+            }
         }
+    },
+
+    showStarterOptions(rowId, starterType) {
+        const modal = document.getElementById('material-picker-modal');
+        const container = modal.querySelector('.picker-main');
+        const sidebar = modal.querySelector('.picker-sidebar');
+        const searchArea = modal.querySelector('.picker-search');
+
+        sidebar.classList.add('hidden');
+        searchArea.classList.add('hidden');
+
+        const category = DATA.materials.find(m => m.name === 'Starters');
+
+        if (starterType === 'DOL Starter') {
+            container.innerHTML = `
+                <div class="p-4">
+                    <h5 class="text-xs font-bold text-primary mb-3">Select Phase for DOL Starter</h5>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${category.phases.map(p => `
+                            <button type="button" class="picker-item" onclick="gatePassModule.showStarterRatings('${rowId}', 'DOL Starter', '${p}')">
+                                ${p}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button type="button" onclick="gatePassModule.showMaterialPicker('${rowId}')" class="btn-sm btn-outline mt-4 w-full">Back</button>
+                </div>
+            `;
+        } else {
+            // Star Delta
+            this.showStarterRatings(rowId, 'Star Delta Starter', null);
+        }
+    },
+
+    showStarterRatings(rowId, starterType, phase) {
+        const modal = document.getElementById('material-picker-modal');
+        const container = modal.querySelector('.picker-main');
+        const category = DATA.materials.find(m => m.name === 'Starters');
+        const ratings = category.ratings[starterType];
+
+        container.innerHTML = `
+            <div class="p-4">
+                <h5 class="text-xs font-bold text-primary mb-3">Select Rating for ${starterType} ${phase ? '(' + phase + ')' : ''}</h5>
+                <div class="grid grid-cols-2 gap-2">
+                    ${ratings.map(r => `
+                        <button type="button" class="picker-item" onclick="gatePassModule.finalizeStarter('${rowId}', '${starterType}', '${phase}', '${r}')">
+                            ${r}
+                        </button>
+                    `).join('')}
+                </div>
+                <button type="button" onclick="gatePassModule.showStarterOptions('${rowId}', '${starterType}')" class="btn-sm btn-outline mt-4 w-full">Back</button>
+            </div>
+        `;
+    },
+
+    finalizeStarter(rowId, starterType, phase, rating) {
+        const row = document.getElementById(rowId);
+        // Handle potential 'null' or 'undefined' strings from template literals
+        const hasPhase = phase && phase !== 'null' && phase !== 'undefined';
+        const finalName = hasPhase ? `${starterType} (${phase} - ${rating})` : `${starterType} (${rating})`;
+        row.querySelector('.mat-name-input').value = `Starters : ${finalName}`;
         document.getElementById('material-picker-modal').remove();
     },
 
