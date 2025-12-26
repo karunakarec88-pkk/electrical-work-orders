@@ -40,5 +40,15 @@ const utils = {
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+    formatQuarter(val) {
+        if (!val) return val;
+        // If it's like F18, C1, SRU5 -> F-18, C-1, SRU-5
+        const formatted = val.toUpperCase().trim();
+        const match = formatted.match(/^([A-Z]+)(\d+)$/);
+        if (match) {
+            return `${match[1]}-${match[2]}`;
+        }
+        return formatted;
     }
 };

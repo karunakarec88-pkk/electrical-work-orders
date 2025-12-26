@@ -45,7 +45,16 @@ const inventoryModule = {
     },
 
     filter() {
-        const query = document.getElementById('inventory-search')?.value.toLowerCase().trim() || '';
+        const input = document.getElementById('inventory-search');
+        if (input) {
+            const rawValue = input.value;
+            const formatted = utils.formatQuarter(rawValue);
+            if (rawValue !== formatted) {
+                input.value = formatted;
+            }
+        }
+
+        const query = input?.value.toLowerCase().trim() || '';
         const results = document.getElementById('inventory-results');
         const orders = storage.get('work_orders').filter(o => o.status === 'completed');
 

@@ -27,6 +27,13 @@ const uploadModule = {
         const results = document.getElementById('quarter-list');
 
         searchInput.addEventListener('input', (e) => {
+            // Auto-format F18 -> F-18
+            const rawValue = e.target.value;
+            const formatted = utils.formatQuarter(rawValue);
+            if (rawValue !== formatted) {
+                e.target.value = formatted;
+            }
+
             const query = e.target.value.toLowerCase();
             if (!query) {
                 results.classList.add('hidden');
