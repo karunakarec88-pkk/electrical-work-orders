@@ -12,10 +12,12 @@ const uploadModule = {
                 <label>Remarks</label>
                 <textarea id="work-remarks" placeholder="Enter work details..."></textarea>
             </div>
-            <div class="form-group">
-                <label>Attachment (Optional)</label>
-                <input type="file" id="work-attachment" accept="image/*">
-            </div>
+            ${auth.isOwnerOrAdmin() ? `
+                <div class="form-group">
+                    <label>Attachment (Optional)</label>
+                    <input type="file" id="work-attachment" accept="image/*">
+                </div>
+            ` : ''}
             <button onclick="uploadModule.save()" class="btn-primary w-full">SAVE WORK ORDER</button>
         `;
 
