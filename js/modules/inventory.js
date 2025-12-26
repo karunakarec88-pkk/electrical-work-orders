@@ -192,13 +192,6 @@ const inventoryModule = {
         }
 
         container.innerHTML = `
-            <div class="stock-summary p-3 bg-slate-700/30 rounded-lg mb-4 border border-slate-600">
-                <p class="text-xs uppercase text-indigo-400 font-bold mb-1">Unused Materials Tracking</p>
-                <div class="grid grid-cols-2 gap-4 text-[10px] text-muted">
-                    <p>• Section Store: Indent - Gatepass</p>
-                    <p>• Colony Store: Gatepass - Used</p>
-                </div>
-            </div>
             <div class="space-y-3">
                 ${filteredMetrics.map(([normName, data]) => {
             const sectionQty = data.indent - data.gatepass;
