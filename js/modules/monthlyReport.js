@@ -1,4 +1,4 @@
-const usedMaterialsModule = {
+const monthlyReportModule = {
     currentYear: null,
     currentMonth: null,
 
