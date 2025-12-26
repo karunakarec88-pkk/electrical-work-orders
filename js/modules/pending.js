@@ -276,7 +276,7 @@ const pendingModule = {
             summary.classList.remove('hidden');
             summary.innerHTML = this.currentMaterials.map(m => `
                 <span class="selected-item-tag">
-                    ${m.item} x ${m.quantity}
+                    ${m.item} : ${m.quantity} ${utils.getUnit(m.item)}
                 </span>
             `).join('');
         } else {
