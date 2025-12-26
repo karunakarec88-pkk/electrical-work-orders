@@ -747,6 +747,18 @@ textarea {
     line-height: 1.4;
 }
 
+.completion-details p {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.completion-details p strong {
+    font-weight: 700;
+    color: var(--primary);
+}
+
 /* Rating Select */
 .sub-material-container {
     display: flex;
