@@ -71,9 +71,14 @@ const inventoryModule = {
     },
 
     renderByQuarter(container, orders, query) {
-        // Group by quarter
-        const matchedOrders = orders.filter(o => o.quarter.toLowerCase().includes(query))
-            .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+        // Group by quarter and materials
+        const matchedOrders = orders.filter(o =>
+            o.quarter.toLowerCase().includes(query) ||
+            o.materials.some(m =>
+                m.item.toLowerCase().includes(query) ||
+                m.category.toLowerCase().includes(query)
+            )
+        ).sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
 
         if (matchedOrders.length === 0) {
             container.innerHTML = '<p class="text-center">No matches found</p>';
@@ -102,7 +107,10 @@ const inventoryModule = {
         const results = [];
         orders.forEach(o => {
             o.materials.forEach(m => {
-                if (m.item.toLowerCase().includes(query)) {
+                const itemMatch = m.item.toLowerCase().includes(query);
+                const catMatch = m.category.toLowerCase().includes(query);
+
+                if (itemMatch || catMatch) {
                     results.push({
                         quarter: o.quarter,
                         date: o.createdAt,
