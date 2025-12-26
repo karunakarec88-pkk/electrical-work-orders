@@ -105,7 +105,7 @@ const monthlyReportModule = {
                 <div class="space-y-2">
                     ${o.materials.map(m => `
                         <div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5">
-                            <span class="text-xs text-slate-200">${m.item}</span>
+                            <span class="text-xs text-slate-200">${m.category} - ${m.item}</span>
                             <span class="text-xs font-medium text-accent">${m.quantity} ${utils.getUnit(m.item)}</span>
                         </div>
                     `).join('')}

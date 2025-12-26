@@ -90,7 +90,7 @@ const inventoryModule = {
                     <p class="mb-1"><em>${utils.sanitize(o.remarks || 'No remarks')}</em></p>
                     <div class="material-list-small">
                         ${o.materials.length > 0 ? o.materials.map(m => `
-                            <span class="material-tag">${m.item} : ${m.quantity} ${utils.getUnit(m.item)}</span>
+                            <span class="material-tag">${m.category} - ${m.item} : ${m.quantity} ${utils.getUnit(m.item)}</span>
                         `).join('') : '<span class="text-muted">No material used</span>'}
                     </div>
                 </div>
@@ -107,6 +107,7 @@ const inventoryModule = {
                         quarter: o.quarter,
                         date: o.createdAt,
                         material: m.item,
+                        category: m.category,
                         quantity: m.quantity
                     });
                 }
@@ -123,7 +124,7 @@ const inventoryModule = {
         container.innerHTML = results.map(r => `
             <div class="inventory-detail-card">
                 <div class="card-header">
-                    <strong>${r.material}</strong>
+                    <strong>${r.category} - ${r.material}</strong>
                     <span class="text-muted">${utils.renderDate(r.date)}</span>
                 </div>
                 <div class="card-body">

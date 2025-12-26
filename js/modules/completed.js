@@ -62,7 +62,7 @@ const completedModule = {
                 <div class="completion-details mt-2">
                     <p><strong>Technicians:</strong> ${order.technicians.join(', ')}</p>
                     <p><strong>Materials:</strong><br>
-                        ${order.materials.map(m => `• ${m.item} : ${m.quantity} ${utils.getUnit(m.item)}`).join('<br>')}
+                        ${order.materials.map(m => `• ${m.category} - ${m.item} : ${m.quantity} ${utils.getUnit(m.item)}`).join('<br>')}
                     </p>
                 </div>
                 <div class="action-buttons mt-2">
