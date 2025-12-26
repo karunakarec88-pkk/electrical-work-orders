@@ -79,9 +79,9 @@ const auth = {
         // Toggle download buttons - this depends on modules being rendered
         document.body.classList.toggle('role-not-admin', !this.isAdmin());
 
-        // Toggle Backup button (Owner/Admin only)
+        // Toggle Backup button (Owner only)
         const backupBtn = document.getElementById('backup-btn');
-        if (backupBtn) backupBtn.classList.toggle('hidden', !this.isOwnerOrAdmin());
+        if (backupBtn) backupBtn.classList.toggle('hidden', !this.isOwner());
 
         // Toggle Reset button (Owner only - High Risk)
         const resetBtn = document.getElementById('reset-btn');
