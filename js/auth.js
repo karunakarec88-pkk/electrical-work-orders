@@ -82,5 +82,9 @@ const auth = {
         // Toggle Backup button (Owner/Admin only)
         const backupBtn = document.getElementById('backup-btn');
         if (backupBtn) backupBtn.classList.toggle('hidden', !this.isOwnerOrAdmin());
+
+        // Toggle Reset button (Owner only - High Risk)
+        const resetBtn = document.getElementById('reset-btn');
+        if (resetBtn) resetBtn.classList.toggle('hidden', !this.isOwner());
     }
 };

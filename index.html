@@ -58,6 +58,10 @@
                     <span>CLOUD SYNC</span>
                 </div>
                 <div id="user-info" class="hidden flex items-center gap-3">
+                    <button id="reset-btn" onclick="storage.factoryReset()" class="btn-icon hidden"
+                        title="Factory Reset (Owner Only)">
+                        <i data-lucide="rotate-ccw" class="text-red-400"></i>
+                    </button>
                     <button id="backup-btn" onclick="storage.downloadBackup()" class="btn-icon hidden"
                         title="Safe Cloud Backup">
                         <i data-lucide="shield-check" class="text-accent"></i>

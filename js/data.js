@@ -242,5 +242,33 @@ const storage = {
         a.click();
         URL.revokeObjectURL(url);
         console.log('🛡️ Security: Local data backup generated.');
+    },
+
+    async factoryReset() {
+        if (!confirm('🛑 CRITICAL ACTION: This will delete ALL data (Work Orders, Indents, Gate Passes, Tenders) permanently from the Cloud and this device. Are you absolutely sure?')) return;
+
+        const secondConfirm = confirm('Please confirm ONE LAST TIME. This cannot be undone.');
+        if (!secondConfirm) return;
+
+        try {
+            const keys = ['work_orders', 'indents', 'gate_passes', 'tenders', 'inventory'];
+
+            // 1. Clear Local Storage
+            keys.forEach(key => localStorage.removeItem(key));
+
+            // 2. Clear Cloud Data
+            if (window.db) {
+                const cloudKeys = ['work_orders', 'indents', 'gate_passes', 'tenders'];
+                for (const key of cloudKeys) {
+                    await db.collection('app_data').doc(key).set({ items: [], updatedAt: new Date().toISOString(), status: 'RESET' });
+                }
+            }
+
+            alert('✅ Application has been reset to factory state. The page will now reload.');
+            window.location.reload();
+        } catch (e) {
+            console.error('Factory Reset Error:', e);
+            alert('Error during reset. Please check console.');
+        }
     }
 };
