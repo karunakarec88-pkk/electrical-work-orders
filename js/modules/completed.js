@@ -1,8 +1,8 @@
 const completedModule = {
     render(container) {
-        // Inject Deleted icon in header FIRST so it always appears
+        // Inject Deleted icon in header FIRST so it always appears (Admin/Owner only)
         const header = document.querySelector('.view-header');
-        if (header && !header.querySelector('.btn-deleted-small')) {
+        if (header && !header.querySelector('.btn-deleted-small') && auth.isOwnerOrAdmin()) {
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-deleted-small';
             delBtn.title = 'View Deleted Records';
@@ -51,9 +51,11 @@ const completedModule = {
                     <button onclick="completedModule.edit('${order.id}')" class="btn-icon-text">
                         <i data-lucide="edit-3"></i> Edit
                     </button>
-                    <button onclick="completedModule.delete('${order.id}')" class="btn-icon-text text-error">
-                        <i data-lucide="trash-2"></i> Delete
-                    </button>
+                    ${auth.isOwnerOrAdmin() ? `
+                        <button onclick="completedModule.delete('${order.id}')" class="btn-icon-text text-error">
+                            <i data-lucide="trash-2"></i> Delete
+                        </button>
+                    ` : ''}
                 </div>
             </div>
         `;
