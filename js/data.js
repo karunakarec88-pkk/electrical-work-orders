@@ -127,7 +127,7 @@ const DATA = {
             unit: 'Nos'
         },
         {
-            name: 'Exhaust Fan',
+            name: 'Exhaust fan',
             items: ['Light duty 300 MM [Metal]', 'Heavy Duty 300 MM [Metal]'],
             unit: 'Nos'
         },
@@ -139,6 +139,11 @@ const DATA = {
                 'DOL Starter': ['0.5 HP Starter', '1 HP Starter', '2 HP Starter', '7.5 HP Starter', '10 HP Starter'],
                 'Star Delta Starter': ['15 HP Starter', '25 HP Starter']
             },
+            unit: 'Nos'
+        },
+        {
+            name: 'Energy Meter',
+            items: ['1PH Energy Meter', '3PH Energy Meter'],
             unit: 'Nos'
         }
     ]
