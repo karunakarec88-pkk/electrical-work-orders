@@ -263,8 +263,9 @@ const storage = {
         console.log('🛡️ Security: Local data backup generated.');
     },
 
-    async factoryReset() {
-        if (!confirm('🛑 CRITICAL ACTION: This will delete ALL data (Work Orders, Indents, Gate Passes, Tenders) permanently from the Cloud and this device. Are you absolutely sure?')) return;
+    async internal_factoryReset() {
+        // This function is for administrative use via command only.
+        if (!confirm('🛑 CRITICAL ACTION: This will delete ALL data (Work Orders, Indents, Gate Passes, Tenders) from the Cloud and this device.')) return;
 
         const secondConfirm = confirm('Please confirm ONE LAST TIME. This cannot be undone.');
         if (!secondConfirm) return;
