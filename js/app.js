@@ -11,6 +11,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // Initialize Real-time Cloud Listeners
     storage.initRealtimeListeners();
 
+    // Run background maintenance
+    setTimeout(() => storage.runMaintenance(), 5000);
+
     // Global click handler to close search results
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-select')) {

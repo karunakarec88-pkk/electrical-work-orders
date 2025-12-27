@@ -189,8 +189,15 @@ const storage = {
     async pushToCloud(key, data) {
         if (!['work_orders', 'indents', 'gate_passes', 'tenders'].includes(key)) return;
         try {
-            // High-level sync: Overwrite the document with the entire array
-            await db.collection('app_data').doc(key).set({ items: data, updatedAt: new Date().toISOString() });
+            // Compress data for storage efficiency
+            const compressed = utils.compress(data);
+
+            // High-level sync: Overwrite the document with the compressed array
+            await db.collection('app_data').doc(key).set({
+                items: compressed,
+                updatedAt: new Date().toISOString(),
+                format: 'compressed_v1'
+            });
         } catch (e) {
             console.error('Cloud Push Error:', e);
         }
@@ -208,7 +215,14 @@ const storage = {
         keys.forEach(key => {
             db.collection('app_data').doc(key).onSnapshot(doc => {
                 if (doc.exists) {
-                    const cloudData = doc.data().items || [];
+                    const docData = doc.data();
+                    let cloudData = docData.items || [];
+
+                    // Decompress if needed
+                    if (docData.format === 'compressed_v1') {
+                        cloudData = utils.decompress(cloudData);
+                    }
+
                     const localData = this.get(key);
 
                     // Only update and re-render if the cloud data is different
@@ -274,6 +288,58 @@ const storage = {
         } catch (e) {
             console.error('Factory Reset Error:', e);
             alert('Error during reset. Please check console.');
+        }
+    },
+
+    async runMaintenance() {
+        if (!auth.isOwner()) return; // Only owner triggers maintenance
+        console.log('🧹 Storage Maintenance: Checking for old records...');
+
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const keys = ['work_orders', 'indents', 'gate_passes', 'tenders'];
+        let totalArchived = 0;
+
+        for (const key of keys) {
+            const data = this.get(key);
+            const toArchive = data.filter(item => {
+                const date = new Date(item.completedAt || item.createdAt);
+                return date < sixMonthsAgo && (item.status === 'completed' || item.status === 'archived');
+            });
+
+            if (toArchive.length > 0) {
+                console.log(`📦 Archiving ${toArchive.length} items from ${key}`);
+                const remaining = data.filter(item => !toArchive.includes(item));
+
+                // Move to Archive Collection
+                await this.archiveData(key, toArchive);
+
+                // Update active collection
+                this.set(key, remaining);
+                totalArchived += toArchive.length;
+            }
+        }
+
+        if (totalArchived > 0) {
+            console.log(`✅ Maintenance Complete: ${totalArchived} items archived.`);
+        }
+    },
+
+    async archiveData(key, items) {
+        try {
+            // Compressed for archival as well
+            const compressed = utils.compress(items);
+            const archiveId = `${key}_${new Date().getFullYear()}_${Math.floor(new Date().getMonth() / 3)}`; // Quarterly archives
+
+            await db.collection('archived_data').doc(archiveId).set({
+                items: firebase.firestore.FieldValue.arrayUnion(...compressed),
+                key,
+                period: archiveId.split('_').slice(1).join('-'),
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
+        } catch (e) {
+            console.error('Archive Error:', e);
         }
     }
 };

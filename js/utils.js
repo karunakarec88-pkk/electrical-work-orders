@@ -50,5 +50,45 @@ const utils = {
             return `${match[1]}-${match[2]}`;
         }
         return formatted;
+    },
+    // Storage Optimization: Key Mappings
+    keys: {
+        'id': 'i',
+        'quarter': 'q',
+        'remarks': 'r',
+        'status': 's',
+        'createdAt': 'c',
+        'completedAt': 'fa', // finished at
+        'technicians': 't',
+        'materials': 'm',
+        'category': 'cat',
+        'item': 'it',
+        'quantity': 'qty',
+        'unit': 'u',
+        'updatedAt': 'ua',
+        'uploads': 'ul',
+        'indentNo': 'in',
+        'items': 'its'
+    },
+    compress(obj) {
+        if (Array.isArray(obj)) return obj.map(o => this.compress(o));
+        if (typeof obj !== 'object' || obj === null) return obj;
+        const newObj = {};
+        for (let k in obj) {
+            const newKey = this.keys[k] || k;
+            newObj[newKey] = this.compress(obj[k]);
+        }
+        return newObj;
+    },
+    decompress(obj) {
+        if (Array.isArray(obj)) return obj.map(o => this.decompress(o));
+        if (typeof obj !== 'object' || obj === null) return obj;
+        const reverseKeys = Object.fromEntries(Object.entries(this.keys).map(([k, v]) => [v, k]));
+        const newObj = {};
+        for (let k in obj) {
+            const oldKey = reverseKeys[k] || k;
+            newObj[oldKey] = this.decompress(obj[k]);
+        }
+        return newObj;
     }
 };

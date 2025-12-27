@@ -41,7 +41,7 @@ const monthlyReportModule = {
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             return months.indexOf(b) - months.indexOf(a);
         }).map(month => `
-                                <div class="archive-folder" onclick="usedMaterialsModule.openMonth('${year}', '${month}')">
+                                <div class="archive-folder" onclick="monthlyReportModule.openMonth('${year}', '${month}')">
                                     <i data-lucide="folder"></i>
                                     <span>${month}</span>
                                 </div>
@@ -69,21 +69,21 @@ const monthlyReportModule = {
         }).sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
 
         container.innerHTML = `
-            <button class="btn-back" onclick="usedMaterialsModule.render(document.getElementById('view-content'))">
+            <button class="btn-back" onclick="monthlyReportModule.render(document.getElementById('view-content'))">
                 <i data-lucide="chevron-left"></i> Back to Archive
             </button>
 
             <div class="flex justify-between items-center mt-6 mb-4">
                 <h2 class="text-xl font-black text-indigo-400">${month} ${year}</h2>
                 ${auth.isOwnerOrAdmin() ? `
-                    <button onclick="usedMaterialsModule.downloadCSV('${year}', '${month}')" class="btn-primary !py-2 !px-4 flex items-center gap-2 text-sm">
+                    <button onclick="monthlyReportModule.downloadCSV('${year}', '${month}')" class="btn-primary !py-2 !px-4 flex items-center gap-2 text-sm">
                         <i data-lucide="download" size="16"></i> CSV
                     </button>
                 ` : ''}
             </div>
 
             <div class="search-box mb-4">
-                <input type="text" id="archive-search" placeholder="Search by quarter or material..." oninput="usedMaterialsModule.filterMonth()">
+                <input type="text" id="archive-search" placeholder="Search by quarter or material..." oninput="monthlyReportModule.filterMonth()">
             </div>
 
             <div id="archive-results" class="space-y-4">
