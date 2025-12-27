@@ -30,7 +30,7 @@ const monthlyReportModule = {
 
         container.innerHTML = `
             <div class="archive-container">
-                <p class="text-xs text-muted mb-4">Select a year and month to view used materials.</p>
+                <p class="text-xs text-muted mb-4">Select a year and month to view reports.</p>
                 ${years.map(year => `
                     <div class="archive-year-group mb-6">
                         <h3 class="flex items-center gap-2 text-primary font-bold mb-3">
@@ -98,15 +98,15 @@ const monthlyReportModule = {
 
         return orders.map(o => `
             <div class="order-card !border-slate-700/50">
-                <div class="flex justify-between mb-3 border-b border-white/5 pb-2">
-                    <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-black">${o.quarter}</span>
-                    <span class="text-[10px] text-slate-500 font-medium">${utils.formatDate(o.completedAt)}</span>
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-2 gap-2">
+                    <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-black whitespace-nowrap">${o.quarter}</span>
+                    <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">${utils.formatDate(o.completedAt)}</span>
                 </div>
                 <div class="space-y-2">
                     ${o.materials.map(m => `
                         <div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5">
                             <span class="text-xs text-slate-200">${m.category} - ${m.item}</span>
-                            <span class="text-xs font-medium text-accent">${m.quantity} ${utils.getUnit(m.item)}</span>
+                            <span class="text-xs font-medium text-accent">: ${m.quantity} ${utils.getUnit(m.item)}</span>
                         </div>
                     `).join('')}
                     ${o.materials.length === 0 ? '<div class="text-[10px] text-muted italic">No materials used</div>' : ''}

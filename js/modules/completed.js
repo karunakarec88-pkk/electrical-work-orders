@@ -28,7 +28,7 @@ const completedModule = {
             container.innerHTML = `
                 <div class="empty-state">
                     <p>No work orders completed in ${now.toLocaleString('default', { month: 'long' })}.</p>
-                    <p class="text-xs mt-2 text-muted">Previous records are moved to <strong>USED MATERIAL LIST</strong> archive.</p>
+                    <p class="text-xs mt-2 text-muted">Previous records are moved to <strong>MONTHLY REPORT</strong> archive.</p>
                 </div>
             `;
             return;

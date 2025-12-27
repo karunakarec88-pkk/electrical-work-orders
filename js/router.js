@@ -40,7 +40,7 @@ const router = {
             case 'inventory':
                 inventoryModule.render(container);
                 break;
-            case 'used-materials':
+            case 'monthly-report':
                 monthlyReportModule.render(container);
                 break;
             case 'indents':
