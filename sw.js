@@ -1,4 +1,4 @@
-const CACHE_NAME = 'work-order-v6';
+const CACHE_NAME = 'work-order-v7';
 const ASSETS = [
     './',
     './index.html',
@@ -26,6 +26,12 @@ self.addEventListener('install', (e) => {
             return cache.addAll(ASSETS);
         })
     );
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
 
 self.addEventListener('activate', (e) => {
