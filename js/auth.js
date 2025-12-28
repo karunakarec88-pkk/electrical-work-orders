@@ -1,60 +1,115 @@
 const auth = {
     user: null,
 
-    async login(role) {
-        const passId = `${role}-pass`;
-        const el = document.getElementById(passId);
-        if (!el) {
-            alert('Selection error. Please refresh.');
-            return;
-        }
-        const password = el.value.trim();
+    async handleSignup() {
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-pass').value.trim();
+        const role = document.getElementById('signup-role').value;
 
-        // Secure hashing: Passwords are compared as SHA-256 hashes
-        const validHashes = {
-            'owner': '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', // admin123
-            'admin': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5', // manager123
-            'technician': '3ac40463b419a7de590185c7121f0bfbe411d6168699e8014f521b050b1d6653' // tech123
-        };
-
-        const inputHash = await utils.sha256(password);
-
-        if (inputHash !== validHashes[role]) {
-            alert(`Incorrect password for ${role.toUpperCase()} role! Please check for typos.`);
+        if (!email || !password || !role) {
+            alert('Please fill in all fields');
             return;
         }
 
-        this.user = { role };
-        localStorage.setItem('user_role', role);
+        try {
+            const userCredential = await fAuth.createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+
+            // Save user profile to Firestore
+            await db.collection('users').doc(user.uid).set({
+                email,
+                role,
+                createdAt: new Date().toISOString()
+            });
+
+            console.log('User signed up and profile created');
+        } catch (error) {
+            console.error('Signup Error:', error);
+            alert(error.message);
+        }
+    },
+
+    async handleLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-pass').value.trim();
+
+        if (!email || !password) {
+            alert('Please enter email and password');
+            return;
+        }
+
+        try {
+            await fAuth.signInWithEmailAndPassword(email, password);
+        } catch (error) {
+            console.error('Login Error:', error);
+            alert('Login failed: ' + error.message);
+        }
+    },
+
+    async handleAuthStateChange(firebaseUser) {
+        try {
+            // Fetch role from Firestore
+            const doc = await db.collection('users').doc(firebaseUser.uid).get();
+            if (doc.exists) {
+                const profile = doc.data();
+                this.user = {
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    role: profile.role
+                };
+
+                this.showMainApp();
+            } else {
+                console.warn('No profile found for user UID:', firebaseUser.uid);
+                // Fallback or force profile creation if needed
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        }
+    },
+
+    showMainApp() {
         document.getElementById('role-selector').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('user-info').classList.remove('hidden');
-        document.getElementById('role-display').textContent = role.toUpperCase();
+        document.getElementById('role-display').textContent = this.user.role.toUpperCase();
         this.syncPermissions();
         lucide.createIcons();
     },
 
-    logout() {
+    switchAuthMode(mode) {
+        document.getElementById('login-form-box').classList.toggle('hidden', mode === 'signup');
+        document.getElementById('signup-form-box').classList.toggle('hidden', mode === 'login');
+        lucide.createIcons();
+    },
+
+    togglePassword(id) {
+        const input = document.getElementById(id);
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+
+        // Toggle icon in the parent wrapper
+        const icon = input.parentElement.querySelector('.toggle-pass i');
+        if (icon) {
+            icon.setAttribute('data-lucide', isPass ? 'eye-off' : 'eye');
+            lucide.createIcons();
+        }
+    },
+
+    async logout(silent = false) {
+        if (!silent) await fAuth.signOut();
+
         this.user = null;
-        localStorage.removeItem('user_role');
         document.getElementById('role-selector').classList.remove('hidden');
         document.getElementById('main-content').classList.add('hidden');
         document.getElementById('user-info').classList.add('hidden');
+
+        // Reset to login form
+        this.switchAuthMode('login');
     },
 
     checkAuth() {
-        const savedRole = localStorage.getItem('user_role');
-        if (savedRole) {
-            this.user = { role: savedRole };
-            document.getElementById('role-selector').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-info').classList.remove('hidden');
-            document.getElementById('role-display').textContent = savedRole.toUpperCase();
-            this.syncPermissions();
-            lucide.createIcons();
-            return true;
-        }
-        return false;
+        return !!fAuth.currentUser;
     },
 
     isOwner() {
@@ -68,7 +123,6 @@ const auth = {
     },
 
     syncPermissions() {
-        // Toggle restricted modules
         const restrictedModules = ['nav-indents', 'nav-gate-pass', 'nav-tender'];
         const canAccessModules = this.isOwnerOrAdmin();
         restrictedModules.forEach(id => {
@@ -76,10 +130,8 @@ const auth = {
             if (el) el.classList.toggle('hidden', !canAccessModules);
         });
 
-        // Toggle download buttons - this depends on modules being rendered
         document.body.classList.toggle('role-not-admin', !this.isAdmin());
 
-        // Toggle Backup button (Owner only)
         const backupBtn = document.getElementById('backup-btn');
         if (backupBtn) backupBtn.classList.toggle('hidden', !this.isOwner());
     }

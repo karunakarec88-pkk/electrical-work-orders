@@ -18,18 +18,17 @@ firebase.initializeApp(firebaseConfig);
 window.db = firebase.firestore();
 window.fAuth = firebase.auth();
 
-// Silent sign-in to provide a session for Security Rules
-fAuth.signInAnonymously().then(() => {
-    console.log('✅ Firebase Auth: Anonymous session started');
-    updateCloudStatus(true);
-}).catch(err => {
-    console.error('🛑 FIREBASE AUTH ERROR:', err);
-    updateCloudStatus(false);
-
-    if (err.code === 'auth/operation-not-allowed') {
-        console.error('👉 ACTION REQUIRED: Go to Firebase Console -> Authentication -> Sign-in method and ENABLE "Anonymous".');
-    } else if (err.code === 'auth/invalid-api-key') {
-        console.error('👉 ERROR: The API Key in your firebase-init.js is incorrect or restricted.');
+// Auth State Listener: Automatically handles session persistence
+fAuth.onAuthStateChanged(async (user) => {
+    if (user) {
+        console.log('✅ Firebase Auth: User logged in:', user.email);
+        updateCloudStatus(true);
+        // Ensure user profile is loaded
+        await auth.handleAuthStateChange(user);
+    } else {
+        console.log('🚪 Firebase Auth: No active session');
+        updateCloudStatus(false);
+        auth.logout(true); // Silent logout to reset UI
     }
 });
 

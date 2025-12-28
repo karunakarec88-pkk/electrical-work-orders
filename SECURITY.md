@@ -17,9 +17,14 @@ This document outlines the security measures implemented in the **Electrical Wor
 - **Environment Isolation**: Sensitive keys and local configuration are stored in `.env.local`, which is strictly excluded from Git via `.gitignore`.
 - **Archive Exclusion**: Large `.zip` and `.docx` source files are excluded to prevent accidental leakage of legacy data.
 
-### 4. API Key Restrictions
-- While the Firebase API Key is public in web applications, it is secured for this project by **Firestore Security Rules**.
-- **Recommended**: Go to the Google Cloud Console (APIs & Services) and restrict your API Key to only allow your GitHub Pages or Firebase Hosting domain.
+### 4. API Key Protection
+- **Vulnerability**: While the Firebase API Key is public by design in web apps, it MUST be restricted to prevent unauthorized usage.
+- **Enforcement**: Secure the key by adding **HTTP Referrer** restrictions in the Google Cloud Console.
+- **Instructions**: 
+  1. Go to [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials).
+  2. Edit your **Browser Key**.
+  3. Set "Application restrictions" to **Websites**.
+  4. Add your domain: `https://work-orders--inventory.firebaseapp.com/*`.
 
 ## 🚀 Pre-Upload Checklist
 

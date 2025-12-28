@@ -14,31 +14,67 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
 
     <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
     <div id="app">
-        <!-- Login / Role Selector Overlay -->
+        <!-- Auth Overlay (Email/Password) -->
         <div id="role-selector" class="overlay">
-            <div class="overlay-content">
-                <h1>Welcome</h1>
-                <p>Please select your role and enter password</p>
-                <div class="login-box">
-                    <div class="login-inputs">
-                        <input type="password" id="owner-pass" placeholder="Owner Password">
-                        <button onclick="auth.login('owner')" class="btn-primary">Login as Owner</button>
+            <div class="overlay-content auth-container">
+                <div id="login-form-box">
+                    <h1>Welcome Back</h1>
+                    <p>Log in to your account</p>
+                    <div class="login-box">
+                        <div class="input-wrapper mb-3">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="login-email" placeholder="Email Address">
+                        </div>
+                        <div class="input-wrapper mb-3">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="login-pass" placeholder="Password">
+                            <button onclick="auth.togglePassword('login-pass')" class="toggle-pass">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                        <button onclick="auth.handleLogin()" class="btn-primary w-full mt-2">Log In</button>
+                        <p class="auth-switch mt-4">
+                            Don't have an account? <a href="#" onclick="auth.switchAuthMode('signup')">Sign Up</a>
+                        </p>
                     </div>
-                    <div class="divider">OR</div>
-                    <div class="login-inputs">
-                        <input type="password" id="admin-pass" placeholder="Admin Password">
-                        <button onclick="auth.login('admin')" class="btn-accent">Login as Admin</button>
-                    </div>
-                    <div class="divider">OR</div>
-                    <div class="login-inputs">
-                        <input type="password" id="technician-pass" placeholder="Technician Password">
-                        <button onclick="auth.login('technician')" class="btn-secondary">Login as Technician</button>
+                </div>
+
+                <div id="signup-form-box" class="hidden">
+                    <h1>Create Account</h1>
+                    <p>Join the work order system</p>
+                    <div class="login-box">
+                        <div class="input-wrapper mb-3">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="signup-email" placeholder="Email Address">
+                        </div>
+                        <div class="input-wrapper mb-3">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="signup-pass" placeholder="Password">
+                        </div>
+                        <div class="input-wrapper mb-3">
+                            <i data-lucide="shield-check" class="input-icon"></i>
+                            <select id="signup-role">
+                                <option value="" disabled selected>Select Your Role</option>
+                                <option value="technician">Staff / Technician</option>
+                                <option value="admin">Admin / Manager</option>
+                                <option value="owner">Project Owner</option>
+                            </select>
+                        </div>
+                        <button onclick="auth.handleSignup()" class="btn-primary w-full mt-2">Create Account</button>
+                        <p class="auth-switch mt-4">
+                            Already have an account? <a href="#" onclick="auth.switchAuthMode('login')">Log In</a>
+                        </p>
                     </div>
                 </div>
             </div>

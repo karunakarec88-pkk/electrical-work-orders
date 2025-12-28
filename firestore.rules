@@ -2,26 +2,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Protect the core app_data collection
+    // User Profiles: Required for role-based access
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Main App Data: Work Orders, Indents, etc.
     match /app_data/{document} {
-      // 1. Require Authentication: Only users with a valid session (Anonymous or otherwise) can interact.
-      allow read: if request.auth != null;
+      // Require Authentication for any access
+      allow read, write: if request.auth != null;
       
-      // 2. Data Validation: Ensure writes are updates/creates, never deletes.
-      allow create, update: if request.auth != null;
-      
-      // 3. Strict Safety: Explicitly block anyone from deleting an entire collection document.
+      // Strict Safety: Explicitly block anyone from deleting an entire collection document.
       allow delete: if false;
     }
 
-    // Protect the archived_data collection
+    // Archived Data Protection
     match /archived_data/{document} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null;
+      allow read, write: if request.auth != null;
       allow delete: if false;
     }
 
-    // Default Deny: Anything else is strictly forbidden.
+    // Default Deny
     match /{document=**} {
       allow read, write: if false;
     }
