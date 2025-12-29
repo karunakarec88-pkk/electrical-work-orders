@@ -1,13 +1,10 @@
-// Firebase Configuration provided by user
 const firebaseConfig = {
-    apiKey: "AIzaSyA5SQowOgyj-wliLpHSW8M9QAoBDaEwm44",
-    authDomain: "work-orders--inventory.firebaseapp.com",
-    databaseURL: "https://work-orders--inventory-default-rtdb.firebaseio.com",
-    projectId: "work-orders--inventory",
-    storageBucket: "work-orders--inventory.firebasestorage.app",
-    messagingSenderId: "25020400502",
-    appId: "1:25020400502:web:e28684094f77ad7644b057",
-    measurementId: "G-F6X7SF76L1"
+    apiKey: "AIzaSyDPb9sh6NCFbFk20eEywI7vxUr-KUsmyys",
+    authDomain: "electrical-work-orders-pkk.firebaseapp.com",
+    projectId: "electrical-work-orders-pkk",
+    storageBucket: "electrical-work-orders-pkk.firebasestorage.app",
+    messagingSenderId: "1079961358792",
+    appId: "1:1079961358792:web:a1c4deadcf533c425e30fd"
 };
 
 // Initialize Firebase

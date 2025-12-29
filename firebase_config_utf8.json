@@ -1,0 +1,17 @@
+﻿{
+  "status": "success",
+  "result": {
+    "fileName": "firebase-js-config.json",
+    "fileContents": "{\n  \"projectId\": \"electrical-work-orders-pkk\",\n  \"appId\": \"1:1079961358792:web:a1c4deadcf533c425e30fd\",\n  \"storageBucket\": \"electrical-work-orders-pkk.firebasestorage.app\",\n  \"apiKey\": \"AIzaSyDPb9sh6NCFbFk20eEywI7vxUr-KUsmyys\",\n  \"authDomain\": \"electrical-work-orders-pkk.firebaseapp.com\",\n  \"messagingSenderId\": \"1079961358792\",\n  \"projectNumber\": \"1079961358792\",\n  \"version\": \"2\"\n}",
+    "sdkConfig": {
+      "projectId": "electrical-work-orders-pkk",
+      "appId": "1:1079961358792:web:a1c4deadcf533c425e30fd",
+      "storageBucket": "electrical-work-orders-pkk.firebasestorage.app",
+      "apiKey": "AIzaSyDPb9sh6NCFbFk20eEywI7vxUr-KUsmyys",
+      "authDomain": "electrical-work-orders-pkk.firebaseapp.com",
+      "messagingSenderId": "1079961358792",
+      "projectNumber": "1079961358792",
+      "version": "2"
+    }
+  }
+}
