@@ -1,4 +1,4 @@
-const CACHE_NAME = 'work-order-v13';
+const CACHE_NAME = 'work-order-v14';
 const ASSETS = [
     './',
     './index.html',
