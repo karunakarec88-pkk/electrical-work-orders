@@ -8,9 +8,6 @@ window.addEventListener('DOMContentLoaded', () => {
     // Initial Badge Update
     router.updatePendingCount();
 
-    // Initialize Real-time Cloud Listeners
-    storage.initRealtimeListeners();
-
     // Run background maintenance
     setTimeout(() => storage.runMaintenance(), 5000);
 

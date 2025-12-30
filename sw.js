@@ -1,4 +1,4 @@
-const CACHE_NAME = 'work-order-v14';
+const CACHE_NAME = 'work-order-v21';
 const ASSETS = [
     './',
     './index.html',
@@ -8,6 +8,7 @@ const ASSETS = [
     './js/data.js',
     './js/auth.js',
     './js/utils.js',
+    './js/firebase-init.js',
     './js/modules/pending.js',
     './js/modules/completed.js',
     './js/modules/upload.js',

@@ -1,0 +1,12 @@
+﻿{
+  "projectId": "work-orders--inventory",
+  "appId": "1:25020400502:web:e28684094f77ad7644b057",
+  "databaseURL": "https://work-orders--inventory-default-rtdb.firebaseio.com",
+  "storageBucket": "work-orders--inventory.firebasestorage.app",
+  "apiKey": "AIzaSyA5SQowOgyj-wliLpHSW8M9QAoBDaEwm44",
+  "authDomain": "work-orders--inventory.firebaseapp.com",
+  "messagingSenderId": "25020400502",
+  "measurementId": "G-F6X7SF76L1",
+  "projectNumber": "25020400502",
+  "version": "2"
+}

@@ -24,7 +24,10 @@ const DATA = {
         { id: 'guest', name: 'Guest House', children: ['Abhinandhan G/H', 'Atithi G/H'] },
         { id: 'dispensary', name: 'Dispensary' },
         { id: 'club', name: 'Staff Club' },
-        { id: 'school', name: 'ZM High School' }
+        { id: 'school', name: 'ZM High School' },
+        { id: 'transport', name: 'Transport Section' },
+        { id: 'security', name: 'Security' },
+        { id: 'ppc', name: 'PPC Moula-Ali' }
     ],
 
     technicians: ['Ramesh', 'Mahesh', 'Venkatesh', 'Sai', 'Santhosh', 'Satish', 'Babu'],
@@ -145,6 +148,16 @@ const DATA = {
             name: 'Energy Meter',
             items: ['1PH Energy Meter', '3PH Energy Meter'],
             unit: 'Nos'
+        },
+        {
+            name: 'Holders',
+            items: ['Angle Holder', 'Pendant Holder', 'Batten Holder'],
+            unit: 'Nos'
+        },
+        {
+            name: 'PVC Bends & Junction Box',
+            items: ['PVC Bends', 'PVC Junction box'],
+            unit: 'Nos'
         }
     ]
 };
@@ -214,6 +227,8 @@ const storage = {
 
         keys.forEach(key => {
             db.collection('app_data').doc(key).onSnapshot(doc => {
+                const localData = this.get(key);
+
                 if (doc.exists) {
                     const docData = doc.data();
                     let cloudData = docData.items || [];
@@ -223,21 +238,21 @@ const storage = {
                         cloudData = utils.decompress(cloudData);
                     }
 
-                    const localData = this.get(key);
-
-                    // Only update and re-render if the cloud data is different
+                    // Only update if cloud data is actually different
                     if (JSON.stringify(cloudData) !== JSON.stringify(localData)) {
-                        console.log(`Cloud Sync: ${key} updated from remote`);
-                        this.set(key, cloudData, true); // Update local cache but don't push back
+                        console.log(`Cloud Sync: ${key} updating from remote`);
+                        this.set(key, cloudData, true); // Update local but skip push back
 
                         if (typeof router !== 'undefined') {
                             router.updatePendingCount();
-                            // If current view is relevant, re-render
-                            const title = document.getElementById('view-title')?.textContent.toLowerCase() || '';
-                            if (title.includes(key.split('_')[0]) || (key === 'work_orders' && (title.includes('pending') || title.includes('completed')))) {
-                                router.refreshCurrentView();
-                            }
+                            router.refreshCurrentView();
                         }
+                    }
+                } else {
+                    // INITIAL SYNC: If cloud doc doesn't exist but local has data, push it!
+                    if (localData.length > 0) {
+                        console.log(`Cloud Sync: Initializing ${key} in cloud...`);
+                        this.pushToCloud(key, localData);
                     }
                 }
             }, err => console.error(`Snapshot Error ${key}:`, err));

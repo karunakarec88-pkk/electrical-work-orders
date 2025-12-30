@@ -1,71 +1,45 @@
 const auth = {
     user: null,
-
-    async handleSignup() {
-        const email = document.getElementById('signup-email').value.trim();
-        const password = document.getElementById('signup-pass').value.trim();
-        const role = document.getElementById('signup-role').value;
-
-        if (!email || !password || !role) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        try {
-            const userCredential = await fAuth.createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-
-            // Save user profile to Firestore
-            await db.collection('users').doc(user.uid).set({
-                email,
-                role,
-                createdAt: new Date().toISOString()
-            });
-
-            console.log('User signed up and profile created');
-        } catch (error) {
-            console.error('Signup Error:', error);
-            alert(error.message);
-        }
+    // Access Keys (Lowercase for reliability)
+    KEYS: {
+        'technician@1054': 'technician',
+        'iict@1054': 'admin',
+        'ec88@1054': 'owner'
     },
 
-    async handleLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-pass').value.trim();
-
-        if (!email || !password) {
-            alert('Please enter email and password');
-            return;
-        }
-
-        try {
-            await fAuth.signInWithEmailAndPassword(email, password);
-        } catch (error) {
-            console.error('Login Error:', error);
-            alert('Login failed: ' + error.message);
-        }
-    },
-
-    async handleAuthStateChange(firebaseUser) {
-        try {
-            // Fetch role from Firestore
-            const doc = await db.collection('users').doc(firebaseUser.uid).get();
-            if (doc.exists) {
-                const profile = doc.data();
-                this.user = {
-                    uid: firebaseUser.uid,
-                    email: firebaseUser.email,
-                    role: profile.role
-                };
-
+    async init() {
+        console.log('🛡️ Auth Version: 2.0 (Access Key System)');
+        const cachedSession = localStorage.getItem('auth_session');
+        if (cachedSession) {
+            try {
+                this.user = JSON.parse(cachedSession);
                 this.showMainApp();
-            } else {
-                console.warn('No profile found for user UID:', firebaseUser.uid);
-                // Fallback or force profile creation if needed
+            } catch (e) {
+                this.logout(true);
             }
-        } catch (error) {
-            console.error('Error fetching user profile:', error);
         }
+    },
+
+    handleAccessKey() {
+        const keyInput = document.getElementById('access-key').value.trim().toLowerCase();
+        const role = this.KEYS[keyInput];
+
+        if (!role) {
+            alert('❌ Invalid Access Key. Please check for typos and try again.');
+            return;
+        }
+
+        // Create virtual user session
+        this.user = {
+            role: role,
+            email: role === 'owner' ? 'karunakarec88@gmail.com' : `${role}@local`,
+            uid: `virtual_${role}_${Date.now()}`
+        };
+
+        // Persist session
+        localStorage.setItem('auth_session', JSON.stringify(this.user));
+        this.showMainApp();
+        console.log(`🔐 Access Granted: Role = ${role}`);
     },
 
     showMainApp() {
@@ -73,43 +47,26 @@ const auth = {
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('user-info').classList.remove('hidden');
         document.getElementById('role-display').textContent = this.user.role.toUpperCase();
+
         this.syncPermissions();
-        lucide.createIcons();
-    },
 
-    switchAuthMode(mode) {
-        document.getElementById('login-form-box').classList.toggle('hidden', mode === 'signup');
-        document.getElementById('signup-form-box').classList.toggle('hidden', mode === 'login');
-        lucide.createIcons();
-    },
-
-    togglePassword(id) {
-        const input = document.getElementById(id);
-        const isPass = input.type === 'password';
-        input.type = isPass ? 'text' : 'password';
-
-        // Toggle icon in the parent wrapper
-        const icon = input.parentElement.querySelector('.toggle-pass i');
-        if (icon) {
-            icon.setAttribute('data-lucide', isPass ? 'eye-off' : 'eye');
+        // Re-initialize Lucide icons for the new view
+        if (window.lucide) {
             lucide.createIcons();
         }
     },
 
-    async logout(silent = false) {
-        if (!silent) await fAuth.signOut();
-
+    logout(silent = false) {
         this.user = null;
+        localStorage.removeItem('auth_session');
+
         document.getElementById('role-selector').classList.remove('hidden');
         document.getElementById('main-content').classList.add('hidden');
         document.getElementById('user-info').classList.add('hidden');
 
-        // Reset to login form
-        this.switchAuthMode('login');
-    },
-
-    checkAuth() {
-        return !!fAuth.currentUser;
+        // Clear input
+        const keyField = document.getElementById('access-key');
+        if (keyField) keyField.value = '';
     },
 
     isOwner() {
@@ -122,17 +79,39 @@ const auth = {
         return this.user && (this.user.role === 'owner' || this.user.role === 'admin');
     },
 
+    togglePassword(id) {
+        const input = document.getElementById(id);
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+
+        const icon = input.parentElement.querySelector('.toggle-pass i');
+        if (icon) {
+            icon.setAttribute('data-lucide', isPass ? 'eye-off' : 'eye');
+            lucide.createIcons();
+        }
+    },
+
     syncPermissions() {
-        const restrictedModules = ['nav-indents', 'nav-gate-pass', 'nav-tender'];
-        const canAccessModules = this.isOwnerOrAdmin();
-        restrictedModules.forEach(id => {
+        // Module visibility based on roles
+        const adminModules = ['nav-indents', 'nav-gate-pass', 'nav-tender'];
+        const isElevated = this.isOwnerOrAdmin();
+
+        adminModules.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.classList.toggle('hidden', !canAccessModules);
+            if (el) el.classList.toggle('hidden', !isElevated);
         });
 
-        document.body.classList.toggle('role-not-admin', !this.isAdmin());
-
+        // Specific buttons
         const backupBtn = document.getElementById('backup-btn');
         if (backupBtn) backupBtn.classList.toggle('hidden', !this.isOwner());
+
+        const manageUsersBtn = document.getElementById('nav-manage-users');
+        if (manageUsersBtn) manageUsersBtn.classList.toggle('hidden', !this.isOwner());
+
+        // Body class for CSS targeting
+        document.body.classList.toggle('role-not-admin', !this.isAdmin() && !this.isOwner());
     }
 };
+
+// Auto-init on load
+document.addEventListener('DOMContentLoaded', () => auth.init());

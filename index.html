@@ -5,29 +5,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com;">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://*.firebase.com;">
     <title>Electrical Work Orders</title>
     <meta name="description"
         content="Professional work order and tender management system for Electrical Department - Outside Campus">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://electrical-work-orders-pkk.web.app/">
+    <meta property="og:url" content="https://work-orders--inventory.firebaseapp.com/">
     <meta property="og:title" content="Electrical Work Orders">
     <meta property="og:description"
         content="Professional work order and tender management system for Electrical Department - Outside Campus">
-    <meta property="og:image" content="https://electrical-work-orders-pkk.web.app/icons/icon-512.png">
+    <meta property="og:image" content="https://work-orders--inventory.firebaseapp.com/icons/icon-512.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://electrical-work-orders-pkk.web.app/">
+    <meta property="twitter:url" content="https://work-orders--inventory.firebaseapp.com/">
     <meta property="twitter:title" content="Electrical Work Orders">
     <meta property="twitter:description"
         content="Professional work order and tender management system for Electrical Department - Outside Campus">
-    <meta property="twitter:image" content="https://electrical-work-orders-pkk.web.app/icons/icon-512.png">
+    <meta property="twitter:image" content="https://work-orders--inventory.firebaseapp.com/icons/icon-512.png">
 
     <!-- Mobile & PWA -->
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WorkOrder">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
 
@@ -43,56 +46,35 @@
 
 <body>
     <div id="app">
-        <!-- Auth Overlay (Email/Password) -->
+        <!-- Auth Overlay (Access Key Only) -->
         <div id="role-selector" class="overlay">
-            <div class="overlay-content auth-container">
+            <div class="overlay-content auth-container glass-card">
                 <div id="login-form-box">
-                    <h1>Welcome Back</h1>
-                    <p>Log in to your account</p>
+                    <div class="auth-header">
+                        <i data-lucide="shield-check" class="auth-logo"></i>
+                        <h1>Secure Access</h1>
+                        <p>Enter your Security Key to continue</p>
+                    </div>
+
                     <div class="login-box">
-                        <div class="input-wrapper mb-3">
-                            <i data-lucide="mail" class="input-icon"></i>
-                            <input type="email" id="login-email" placeholder="Email Address">
-                        </div>
-                        <div class="input-wrapper mb-3">
-                            <i data-lucide="lock" class="input-icon"></i>
-                            <input type="password" id="login-pass" placeholder="Password">
-                            <button onclick="auth.togglePassword('login-pass')" class="toggle-pass">
+                        <div class="input-wrapper mb-4">
+                            <i data-lucide="key-round" class="input-icon"></i>
+                            <input type="password" id="access-key" placeholder="Enter Security Key..."
+                                autocomplete="current-password">
+                            <button onclick="auth.togglePassword('access-key')" class="toggle-pass">
                                 <i data-lucide="eye"></i>
                             </button>
                         </div>
-                        <button onclick="auth.handleLogin()" class="btn-primary w-full mt-2">Log In</button>
-                        <p class="auth-switch mt-4">
-                            Don't have an account? <a href="#" onclick="auth.switchAuthMode('signup')">Sign Up</a>
-                        </p>
+                        <button onclick="auth.handleAccessKey()" class="btn-primary w-full btn-glow">
+                            <span>VERIFY & ENTER</span>
+                            <i data-lucide="arrow-right" size="18"></i>
+                        </button>
                     </div>
-                </div>
 
-                <div id="signup-form-box" class="hidden">
-                    <h1>Create Account</h1>
-                    <p>Join the work order system</p>
-                    <div class="login-box">
-                        <div class="input-wrapper mb-3">
-                            <i data-lucide="mail" class="input-icon"></i>
-                            <input type="email" id="signup-email" placeholder="Email Address">
-                        </div>
-                        <div class="input-wrapper mb-3">
-                            <i data-lucide="lock" class="input-icon"></i>
-                            <input type="password" id="signup-pass" placeholder="Password">
-                        </div>
-                        <div class="input-wrapper mb-3">
-                            <i data-lucide="shield-check" class="input-icon"></i>
-                            <select id="signup-role">
-                                <option value="" disabled selected>Select Your Role</option>
-                                <option value="technician">Staff / Technician</option>
-                                <option value="admin">Admin / Manager</option>
-                                <option value="owner">Project Owner</option>
-                            </select>
-                        </div>
-                        <button onclick="auth.handleSignup()" class="btn-primary w-full mt-2">Create Account</button>
-                        <p class="auth-switch mt-4">
-                            Already have an account? <a href="#" onclick="auth.switchAuthMode('login')">Log In</a>
-                        </p>
+                    <div class="auth-footer">
+                        <p>Department of Electrical Engineering</p>
+                        <small style="opacity: 0.3; font-size: 0.6rem; display: block; margin-top: 5px;">v2.1
+                            Master</small>
                     </div>
                 </div>
             </div>
@@ -124,6 +106,15 @@
                 </div>
             </div>
         </header>
+
+        <!-- Diagnostic Console -->
+        <div id="debug-console" class="hidden">
+            <div class="debug-header">
+                <span>🛠️ System Diagnostic</span>
+                <button onclick="this.parentElement.parentElement.classList.add('hidden')">Close</button>
+            </div>
+            <div id="debug-logs"></div>
+        </div>
 
         <main id="main-content" class="hidden">
             <nav class="dashboard-grid">
@@ -162,6 +153,10 @@
                     <i data-lucide="briefcase"></i>
                     <span>TENDER(W&S)</span>
                 </button>
+                <button onclick="router.navigate('users')" class="nav-card hidden" id="nav-manage-users">
+                    <i data-lucide="users"></i>
+                    <span>MANAGE USERS</span>
+                </button>
             </nav>
 
             <section id="view-container" class="hidden">
@@ -177,26 +172,28 @@
         </main>
     </div>
 
-    <!-- Firebase SDKs (Compat Version for standard script support) -->
+    <!-- Core Utilities & Data -->
+    <script src="js/utils.js?v=26"></script>
+    <script src="js/data.js?v=26"></script>
+    <script src="js/auth.js?v=26"></script>
+    <script src="js/router.js?v=26"></script>
+
+    <!-- Firebase SDKs & Init -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-init.js"></script>
-
-    <script src="js/data.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/router.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/modules/upload.js"></script>
-    <script src="js/modules/pending.js"></script>
-    <script src="js/modules/completed.js"></script>
-    <script src="js/modules/monthlyReport.js"></script>
-    <script src="js/modules/inventory.js"></script>
-    <script src="js/modules/indents.js"></script>
-    <script src="js/modules/gatepass.js"></script>
-    <script src="js/modules/deleted.js"></script>
-    <script src="js/modules/tender.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/firebase-init.js?v=29"></script>
+    <script src="js/modules/upload.js?v=26"></script>
+    <script src="js/modules/pending.js?v=26"></script>
+    <script src="js/modules/completed.js?v=26"></script>
+    <script src="js/modules/monthlyReport.js?v=26"></script>
+    <script src="js/modules/inventory.js?v=26"></script>
+    <script src="js/modules/indents.js?v=26"></script>
+    <script src="js/modules/gatepass.js?v=26"></script>
+    <script src="js/modules/deleted.js?v=26"></script>
+    <script src="js/modules/tender.js?v=26"></script>
+    <script src="js/modules/users.js?v=26"></script>
+    <script src="js/app.js?v=26"></script>
 </body>
 
 </html>

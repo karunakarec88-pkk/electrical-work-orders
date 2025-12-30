@@ -4,8 +4,19 @@ service cloud.firestore {
     
     // User Profiles: Required for role-based access
     match /users/{userId} {
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // Allow any logged in user to see profiles (needed for owner to see the list)
+      allow read: if request.auth != null;
+      
+      // Allow user to create their own initial profile
+      allow create: if request.auth != null && request.auth.uid == userId 
+                     && request.resource.data.role != 'owner'; // Force non-owner on signup
+      
+      // Allow owner (karunakarec88@gmail.com) to update any role
+      // Allow users to update their own non-role data
+      allow update: if request.auth != null && (
+        request.auth.token.email == 'karunakarec88@gmail.com' || 
+        (request.auth.uid == userId && request.resource.data.role == resource.data.role)
+      );
     }
 
     // Main App Data: Work Orders, Indents, etc.

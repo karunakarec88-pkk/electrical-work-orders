@@ -18,7 +18,10 @@ A high-end, real-time web application for managing electrical work orders, inden
 ## Local Setup
 1. Clone the repository.
 2. Open `index.html` in any modern browser.
-3. Configure your Firebase project in `js/firebase-init.js`.
+3. Configure your Firebase project by creating `js/firebase-config.js` (see `SECURITY.md` for details).
+
+> [!IMPORTANT]
+> Never commit `js/firebase-config.js` or any other files containing API keys to public repositories.
 
 ---
 *Created for Electrical Department - Outside Campus*

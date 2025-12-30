@@ -20,6 +20,12 @@ const router = {
             mainNav.classList.add('hidden');
             viewContainer.classList.remove('hidden');
             viewTitle.textContent = view.toUpperCase().replace('-', ' ');
+
+            // Trigger View Animation
+            viewContent.classList.remove('view-enter');
+            void viewContent.offsetWidth;
+            viewContent.classList.add('view-enter');
+
             this.renderView(view, viewContent);
         }
         lucide.createIcons();
@@ -54,6 +60,9 @@ const router = {
                 break;
             case 'tender':
                 tenderModule.render(container);
+                break;
+            case 'users':
+                usersModule.render(container);
                 break;
             default:
                 container.innerHTML = `<p class="placeholder">Module ${view} coming soon...</p>`;

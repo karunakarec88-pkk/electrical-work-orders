@@ -15,12 +15,22 @@ implementation_plan.md
 *.docx
 extracted_docx/
 
-# Environment Files
+# Environment & Config Files
 .env*
+js/firebase-config.js
+firebase_config*.json
+projects.json
+projects_list*.json
+login_list*.json
+projects.txt
+projects_utf8.txt
+projects_check.json
+final_*.json
 
 # Dependencies
 node_modules/
 package-lock.json
 
-# Local storage backups (if any)
+# Local storage backups & logs
 *.log
+backup_*.json
