@@ -75,7 +75,7 @@ const monthlyReportModule = {
 
             <div class="flex justify-between items-center mt-6 mb-4">
                 <h2 class="text-xl font-black text-indigo-400">${month} ${year}</h2>
-                ${auth.isOwnerOrAdmin() ? `
+                ${auth.isOwner() ? `
                     <button onclick="monthlyReportModule.downloadCSV('${year}', '${month}')" class="btn-primary !py-2 !px-4 flex items-center gap-2 text-sm">
                         <i data-lucide="download" size="16"></i> CSV
                     </button>

@@ -7,8 +7,8 @@ const auth = {
         'ec88@1054': 'owner'
     },
 
-    async init() {
-        console.log('🛡️ Auth Version: 2.0 (Access Key System)');
+    async checkAuth() {
+        console.log('🛡️ Auth Version: 2.1 (Security Patch)');
         const cachedSession = localStorage.getItem('auth_session');
         if (cachedSession) {
             try {
@@ -93,7 +93,7 @@ const auth = {
 
     syncPermissions() {
         // Module visibility based on roles
-        const adminModules = ['nav-indents', 'nav-gate-pass', 'nav-tender'];
+        const adminModules = ['nav-indents', 'nav-gate-pass', 'nav-tender', 'nav-inventory'];
         const isElevated = this.isOwnerOrAdmin();
 
         adminModules.forEach(id => {
@@ -110,8 +110,43 @@ const auth = {
 
         // Body class for CSS targeting
         document.body.classList.toggle('role-not-admin', !this.isAdmin() && !this.isOwner());
+    },
+
+    async getAllUsers() {
+        const fallback = this.user ? [this.user] : [];
+        if (!window.db) return fallback;
+
+        try {
+            // Set a strict 3-second timeout for cloud fetch
+            const fetchPromise = window.db.collection('users').get();
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Auth Timeout')), 3000));
+
+            const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
+            const users = [];
+            snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
+
+            return users.length > 0 ? users : fallback;
+        } catch (e) {
+            console.warn('Cloud Users Fetch Skip (Using Local Session):', e.message);
+            return fallback;
+        }
+    },
+
+    async updateUserRole(uid, newRole) {
+        if (!window.db) return false;
+        try {
+            if (!uid || uid.startsWith('virtual_')) {
+                alert('Cannot change role of a virtual session user.');
+                return false;
+            }
+            await window.db.collection('users').doc(uid).update({ role: newRole });
+            return true;
+        } catch (e) {
+            console.error('Update Role Error:', e);
+            return false;
+        }
     }
 };
 
 // Auto-init on load
-document.addEventListener('DOMContentLoaded', () => auth.init());
+document.addEventListener('DOMContentLoaded', () => auth.checkAuth());

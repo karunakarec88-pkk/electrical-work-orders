@@ -221,7 +221,7 @@ const completedModule = {
                     ${ratings.map(r => `<option value="${r}" ${existingRating === r ? 'selected' : ''}>${r}</option>`).join('')}
                 </select>
             `;
-        } else if (categoryName === 'Switches & Sockets' && item.includes('Modular') && category.companies) {
+        } else if (categoryName === 'Switches & Sockets' && item.includes('Modular') && !item.toLowerCase().includes('non modular') && category.companies) {
             container.innerHTML = `
                 <select class="rating-select">
                     <option value="">Company...</option>

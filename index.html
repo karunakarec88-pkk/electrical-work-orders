@@ -6,9 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://*.firebase.com;">
-    <title>Electrical Work Orders</title>
+    <title>Electrical Work Orders (v3.3)</title>
     <meta name="description"
         content="Professional work order and tender management system for Electrical Department - Outside Campus">
+    <script>
+        // Force refresh logic for v3.3 deployment
+        const APP_VERSION = '3.4';
+        if (localStorage.getItem('app_version') !== APP_VERSION) {
+            if ('serviceWorker' in navigator) {
+                caches.keys().then(names => {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            localStorage.setItem('app_version', APP_VERSION);
+            console.log('Detected old version. Clearing cache and reloading...');
+            window.location.reload(true);
+        }
+    </script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -73,7 +87,7 @@
 
                     <div class="auth-footer">
                         <p>Department of Electrical Engineering</p>
-                        <small style="opacity: 0.3; font-size: 0.6rem; display: block; margin-top: 5px;">v2.1
+                        <small style="opacity: 0.3; font-size: 0.6rem; display: block; margin-top: 5px;">v3.0
                             Master</small>
                     </div>
                 </div>
@@ -107,14 +121,6 @@
             </div>
         </header>
 
-        <!-- Diagnostic Console -->
-        <div id="debug-console" class="hidden">
-            <div class="debug-header">
-                <span>🛠️ System Diagnostic</span>
-                <button onclick="this.parentElement.parentElement.classList.add('hidden')">Close</button>
-            </div>
-            <div id="debug-logs"></div>
-        </div>
 
         <main id="main-content" class="hidden">
             <nav class="dashboard-grid">
@@ -137,7 +143,7 @@
                     <i data-lucide="list"></i>
                     <span>MONTHLY REPORT</span>
                 </button>
-                <button onclick="router.navigate('inventory')" class="nav-card">
+                <button onclick="router.navigate('inventory')" class="nav-card" id="nav-inventory">
                     <i data-lucide="database"></i>
                     <span>INVENTORY</span>
                 </button>
@@ -152,10 +158,6 @@
                 <button onclick="router.navigate('tender')" class="nav-card" id="nav-tender">
                     <i data-lucide="briefcase"></i>
                     <span>TENDER(W&S)</span>
-                </button>
-                <button onclick="router.navigate('users')" class="nav-card hidden" id="nav-manage-users">
-                    <i data-lucide="users"></i>
-                    <span>MANAGE USERS</span>
                 </button>
             </nav>
 
@@ -173,27 +175,28 @@
     </div>
 
     <!-- Core Utilities & Data -->
-    <script src="js/utils.js?v=26"></script>
-    <script src="js/data.js?v=26"></script>
-    <script src="js/auth.js?v=26"></script>
-    <script src="js/router.js?v=26"></script>
+    <script src="js/utils.js?v=32"></script>
+    <script src="js/data.js?v=32"></script>
+    <script src="js/auth.js?v=32"></script>
+    <script src="js/router.js?v=32"></script>
 
     <!-- Firebase SDKs & Init -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-init.js?v=29"></script>
-    <script src="js/modules/upload.js?v=26"></script>
-    <script src="js/modules/pending.js?v=26"></script>
-    <script src="js/modules/completed.js?v=26"></script>
-    <script src="js/modules/monthlyReport.js?v=26"></script>
-    <script src="js/modules/inventory.js?v=26"></script>
-    <script src="js/modules/indents.js?v=26"></script>
-    <script src="js/modules/gatepass.js?v=26"></script>
-    <script src="js/modules/deleted.js?v=26"></script>
-    <script src="js/modules/tender.js?v=26"></script>
-    <script src="js/modules/users.js?v=26"></script>
-    <script src="js/app.js?v=26"></script>
+    <script src="js/firebase-config.js?v=32"></script>
+    <script src="js/firebase-init.js?v=32"></script>
+    <script src="js/modules/upload.js?v=32"></script>
+    <script src="js/modules/pending.js?v=32"></script>
+    <script src="js/modules/completed.js?v=32"></script>
+    <script src="js/modules/monthlyReport.js?v=32"></script>
+    <script src="js/modules/inventory.js?v=32"></script>
+    <script src="js/modules/indents.js?v=32"></script>
+    <script src="js/modules/gatepass.js?v=32"></script>
+    <script src="js/modules/deleted.js?v=32"></script>
+    <script src="js/modules/tender.js?v=32"></script>
+    <script src="js/modules/users.js?v=32"></script>
+    <script src="js/app.js?v=32"></script>
 </body>
 
 </html>

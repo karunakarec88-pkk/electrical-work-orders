@@ -32,7 +32,7 @@ const indentsModule = {
                                     <button onclick="indentsModule.viewIndentDetails('${indent.id}')" class="btn-micro bg-slate-700 hover:bg-slate-600 text-slate-300 p-1 rounded" title="View Details">
                                         <i data-lucide="eye" size="12"></i>
                                     </button>
-                                    ${auth.isAdmin() ? `
+                                    ${auth.isOwner() ? `
                                         <button onclick="indentsModule.downloadIndentCSV('${indent.id}')" class="btn-micro bg-primary/20 hover:bg-primary/30 text-primary p-1 rounded" title="Download CSV">
                                             <i data-lucide="download" size="12"></i>
                                         </button>
@@ -99,7 +99,6 @@ const indentsModule = {
 
                     return `
                                     <div class="indent-item-box">
-                                        <div class="flex justify-between items-start mb-3">
                                             <div class="flex flex-col">
                                                 <div class="flex items-center gap-2 mb-2">
                                                     <span class="text-lg font-black ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-100'}">${item.item}</span>
@@ -110,6 +109,11 @@ const indentsModule = {
                                                     ` : ''}
                                                 </div>
                                             </div>
+                                            ${auth.isOwner() ? `
+                                                <button onclick="indentsModule.openAllocationModal('${indent.id}', '${item.item.replace(/'/g, "\\'")}')" class="btn-micro bg-primary/20 text-primary hover:bg-primary/40 rounded px-2 py-1 text-[10px] font-bold">
+                                                    MANAGE SPLIT
+                                                </button>
+                                            ` : ''}
                                         </div>
                                         <div class="mt-6 bg-slate-900/40 rounded-2xl border border-white/5 overflow-hidden">
                                             <div class="p-4 border-b border-white/5 flex items-center bg-slate-800/10 gap-3">
@@ -119,11 +123,34 @@ const indentsModule = {
                                                     <span class="text-xs text-slate-600 font-bold italic ml-1">${unit}</span>
                                                 </div>
                                             </div>
-                                            <div class="p-4 flex items-center bg-indigo-500/5 gap-3">
-                                                <span class="w-24 text-[9px] text-indigo-400/70 uppercase font-black tracking-widest">Section Store</span>
+                                            <div class="bg-slate-900/60 py-2 px-4 border-b border-white/5">
+                                                <p class="text-[9px] text-primary/80 font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                                                    <i data-lucide="share-2" size="10"></i> Material Sharing Breakdown
+                                                </p>
+                                            </div>
+                                            <div class="flex gap-2 border-b border-white/5 bg-slate-900/40 p-1">
+                                                <div class="flex-1 p-3 rounded-xl bg-indigo-500/5 border border-white/5">
+                                                    <span class="block text-[8px] text-indigo-400/60 uppercase font-black mb-1">LAB Split</span>
+                                                    <input type="number" 
+                                                           class="w-full bg-transparent border-none text-indigo-200 font-black p-0 focus:ring-0 text-xl h-8" 
+                                                           value="${item.labQty || 0}" 
+                                                           step="0.5"
+                                                           onchange="indentsModule.updateInlineSplit('${indent.id}', '${item.item.replace(/'/g, "\\'")}', 'lab', this.value)">
+                                                </div>
+                                                <div class="flex-1 p-3 rounded-xl bg-emerald-500/5 border border-white/5">
+                                                    <span class="block text-[8px] text-emerald-400/60 uppercase font-black mb-1">Quarters Split</span>
+                                                    <input type="number" 
+                                                           class="w-full bg-transparent border-none text-emerald-200 font-black p-0 focus:ring-0 text-xl h-8" 
+                                                           value="${item.quartersQty || 0}" 
+                                                           step="0.5"
+                                                           onchange="indentsModule.updateInlineSplit('${indent.id}', '${item.item.replace(/'/g, "\\'")}', 'quarters', this.value)">
+                                                </div>
+                                            </div>
+                                            <div class="p-4 flex items-center bg-emerald-500/10 gap-3">
+                                                <span class="w-24 text-[9px] text-emerald-400/70 uppercase font-black tracking-widest leading-tight">QUARTERS<br>SECTION STORE</span>
                                                 <div class="flex items-baseline">
-                                                    <span class="text-xl text-indigo-300 font-black">: ${initialQty - usedQty}</span>
-                                                    <span class="text-xs text-indigo-400/50 font-bold italic ml-2">&nbsp; ${unit}</span>
+                                                    <span class="text-xl text-emerald-300 font-black">: ${(item.quartersQty || 0) - usedQty}</span>
+                                                    <span class="text-xs text-emerald-400/50 font-bold italic ml-2">&nbsp; ${unit}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -219,23 +246,36 @@ const indentsModule = {
     addMaterialRow() {
         const section = document.getElementById('indent-items');
         const row = document.createElement('div');
-        row.className = 'gate-item-row bg-slate-800/40 border-2 border-slate-700/60 rounded-3xl p-6 mb-10 relative shadow-2xl flex gap-2 items-center';
+        row.className = 'gate-item-row bg-slate-800/40 border-2 border-slate-700/60 rounded-3xl p-6 mb-10 relative shadow-2xl flex flex-col gap-4';
         row.innerHTML = `
-            <div class="flex-1">
-                <select class="material-select w-full" onchange="indentsModule.onMaterialChange(this)">
-                    <option value="">Select Category...</option>
-                    ${DATA.materials.map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
-                </select>
-                <div class="sub-material-container mt-1"></div>
+            <div class="flex gap-4 items-center">
+                <div class="flex-1">
+                    <select class="material-select w-full" onchange="indentsModule.onMaterialChange(this)">
+                        <option value="">Select Category...</option>
+                        ${DATA.materials.map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
+                    </select>
+                    <div class="sub-material-container mt-1"></div>
+                </div>
+                <div class="qty-control h-12">
+                    <button onclick="this.nextElementSibling.stepDown()" class="qty-btn">-</button>
+                    <input type="number" class="qty-input" value="1" min="1">
+                    <button onclick="this.previousElementSibling.stepUp()" class="qty-btn">+</button>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="btn-icon text-error">
+                    <i data-lucide="trash-2"></i>
+                </button>
             </div>
-            <div class="qty-control">
-                <button onclick="this.nextElementSibling.stepDown()" class="qty-btn">-</button>
-                <input type="number" class="qty-input" value="1" min="1">
-                <button onclick="this.previousElementSibling.stepUp()" class="qty-btn">+</button>
+            
+            <div class="allocation-grid grid grid-cols-2 gap-4 pt-4 border-t border-slate-700/30">
+                <div class="form-group mb-0">
+                    <label class="text-[10px] uppercase font-black text-slate-500 mb-1">LAB Allocation</label>
+                    <input type="number" class="lab-qty w-full !bg-slate-900/50 !border-slate-700/50 text-indigo-300 font-bold" value="0" step="0.5">
+                </div>
+                <div class="form-group mb-0">
+                    <label class="text-[10px] uppercase font-black text-slate-500 mb-1">Quarters Allocation</label>
+                    <input type="number" class="quarters-qty w-full !bg-slate-900/50 !border-slate-700/50 text-emerald-300 font-bold" value="0" step="0.5">
+                </div>
             </div>
-            <button onclick="this.parentElement.remove()" class="btn-icon text-error">
-                <i data-lucide="trash-2"></i>
-            </button>
         `;
         section.appendChild(row);
         lucide.createIcons();
@@ -315,7 +355,7 @@ const indentsModule = {
             return;
         }
 
-        const rows = Array.from(document.querySelectorAll('.material-row'));
+        const rows = Array.from(document.querySelectorAll('.gate-item-row'));
         const items = rows.map(row => {
             const category = row.querySelector('.material-select').value;
             const subSelect = row.querySelector('.sub-material-select');
@@ -325,7 +365,14 @@ const indentsModule = {
             const item = subSelect ? subSelect.value : null;
             const phase = phaseSelect ? phaseSelect.value : null;
             const rating = ratingSelect ? ratingSelect.value : null;
-            const quantity = parseInt(row.querySelector('.qty-input').value);
+            const quantity = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const labQty = parseFloat(row.querySelector('.lab-qty').value) || 0;
+            const quartersQty = parseFloat(row.querySelector('.quarters-qty').value) || 0;
+
+            if (Math.abs((labQty + quartersQty) - quantity) > 0.01) {
+                alert(`Allocation mismatch for ${item || 'item'}. LAB (${labQty}) + Quarters (${quartersQty}) must equal Total (${quantity})`);
+                throw new Error('Allocation mismatch');
+            }
 
             let finalItem = item;
             if (phase && rating) {
@@ -334,7 +381,14 @@ const indentsModule = {
                 finalItem = `${item} (${rating})`;
             }
 
-            return { category, item: finalItem, quantity, initialQuantity: quantity };
+            return {
+                category,
+                item: finalItem,
+                quantity,
+                initialQuantity: quantity,
+                labQty,
+                quartersQty
+            };
         }).filter(i => i.category && i.item);
 
         if (items.length === 0) {
@@ -386,6 +440,102 @@ const indentsModule = {
             storage.set('indents', indents);
             this.render(document.getElementById('view-content'));
         }
+    },
+
+    openAllocationModal(indentId, itemName) {
+        const indents = storage.get('indents');
+        const indent = indents.find(i => i.id === indentId);
+        if (!indent) return;
+
+        const item = indent.items.find(i => i.item === itemName);
+        if (!item) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'picker-overlay';
+        overlay.id = 'allocation-modal';
+        overlay.innerHTML = `
+            <div class="picker-content !max-w-md !h-auto p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-primary font-black uppercase tracking-widest text-sm">Update Material Split</h3>
+                    <button onclick="this.closest('.picker-overlay').remove()" class="text-slate-500 hover:text-white">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                
+                <div class="bg-slate-900/50 p-4 rounded-2xl border border-white/5 mb-6">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Material Name</p>
+                    <p class="font-black text-slate-100">${item.item}</p>
+                    <p class="text-[10px] text-primary font-bold mt-2">TOTAL PURCHASED: ${item.initialQuantity || item.quantity}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group mb-4">
+                        <label class="text-[10px] uppercase font-black text-indigo-400">LAB Allocation</label>
+                        <input type="number" id="modal-lab-qty" class="w-full !bg-slate-800 !border-slate-700 text-indigo-200 font-bold" value="${item.labQty || 0}" step="0.5">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="text-[10px] uppercase font-black text-emerald-400">Quarters Allocation</label>
+                        <input type="number" id="modal-qtr-qty" class="w-full !bg-slate-800 !border-slate-700 text-emerald-200 font-bold" value="${item.quartersQty || 0}" step="0.5">
+                    </div>
+                </div>
+
+                <button onclick="indentsModule.saveAllocation('${indentId}', '${itemName.replace(/'/g, "\\'")}')" class="btn-primary w-full mt-4">SAVE ALLOCATION</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        lucide.createIcons();
+    },
+
+    saveAllocation(indentId, itemName) {
+        const indents = storage.get('indents');
+        const indent = indents.find(i => i.id === indentId);
+        if (!indent) return;
+
+        const item = indent.items.find(i => i.item === itemName);
+        if (!item) return;
+
+        const lab = parseFloat(document.getElementById('modal-lab-qty').value) || 0;
+        const qtr = parseFloat(document.getElementById('modal-qtr-qty').value) || 0;
+        const total = item.initialQuantity || item.quantity;
+
+        if (Math.abs((lab + qtr) - total) > 0.01) {
+            alert(`Allocation mismatch. LAB (${lab}) + Quarters (${qtr}) must equal Total (${total})`);
+            return;
+        }
+
+        item.labQty = lab;
+        item.quartersQty = qtr;
+
+        storage.set('indents', indents);
+        document.getElementById('allocation-modal').remove();
+        this.render(document.getElementById('view-content'));
+    },
+
+    updateInlineSplit(indentId, itemName, type, value) {
+        const indents = storage.get('indents');
+        const indent = indents.find(i => i.id === indentId);
+        if (!indent) return;
+
+        const item = indent.items.find(i => i.item === itemName);
+        if (!item) return;
+
+        const numVal = parseFloat(value) || 0;
+        const total = item.initialQuantity || item.quantity;
+
+        if (type === 'lab') {
+            item.labQty = numVal;
+            // Optionally auto-adjust quarters if you want, but user said "enter sharing by me"
+            // So we'll just check for mismatch if they both exist
+        } else {
+            item.quartersQty = numVal;
+        }
+
+        // Just validate total doesn't exceed purchased if both are set? 
+        // Or just let them enter and we'll warn on Gate Pass if Quarters is too high?
+        // User wants "enter sharing by me", so let them.
+
+        storage.set('indents', indents);
+        this.render(document.getElementById('view-content'));
     },
 
     downloadIndentCSV(id) {

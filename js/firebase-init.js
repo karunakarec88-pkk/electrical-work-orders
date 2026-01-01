@@ -1,48 +1,9 @@
-// Hardcoded Firebase configuration for maximum reliability
-// Verified against Firebase Console CLI - DEC 31 2025
-window.firebaseConfig = {
-    apiKey: "AIzaSyA5SQowOgyj-wliLpHSW8M9QAoBDaEwm44",
-    authDomain: "work-orders--inventory.firebaseapp.com",
-    projectId: "work-orders--inventory",
-    storageBucket: "work-orders--inventory.firebasestorage.app",
-    messagingSenderId: "25020400502",
-    appId: "1:25020400502:web:e28684094f77ad7644b057"
-};
+// Firebase initialization using external config
+console.log('📦 Firebase Config: Loading external configuration...');
 
-// -- Mobile Debug Interceptor --
-(function () {
-    const originalLog = console.log;
-    const originalError = console.error;
-    const originalWarn = console.warn;
-
-    function appendToDebug(msg, type) {
-        const consoleEl = document.getElementById('debug-console');
-        const logEl = document.getElementById('debug-logs');
-        if (!consoleEl || !logEl) return;
-
-        consoleEl.classList.remove('hidden');
-        const entry = document.createElement('div');
-        entry.className = `log-entry log-${type}`;
-        entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        logEl.appendChild(entry);
-        logEl.scrollTop = logEl.scrollHeight;
-    }
-
-    console.log = (...args) => {
-        originalLog(...args);
-        appendToDebug(args.join(' '), 'info');
-    };
-    console.error = (...args) => {
-        originalError(...args);
-        appendToDebug(args.join(' '), 'error');
-    };
-    console.warn = (...args) => {
-        originalWarn(...args);
-        appendToDebug(args.join(' '), 'warn');
-    };
-})();
-
-console.log('📦 Firebase Config: Hardcoded configuration loaded.');
+if (!window.firebaseConfig) {
+    console.error('❌ Firebase Config: Not found! Create js/firebase-config.js (ignored by Git).');
+}
 
 // Initialize Firebase SDKs
 if (typeof firebase !== 'undefined') {

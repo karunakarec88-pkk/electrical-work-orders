@@ -1,36 +1,30 @@
-# System Files
+# Environment Secrets
+.env*
+
+# Firebase Configuration (Private)
+js/firebase-config.js
+
+# Maintenance Scripts
+wipe-data.js
+wipe_results.txt
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
 .DS_Store
 Thumbs.db
-Desktop.ini
 
-# Gemini/Antigravity Data
-.gemini/
-antigravity_data.json
-task.md
-walkthrough.md
-implementation_plan.md
-
-# Archives & Temporary Data
+# Large Archives/Backups
 *.zip
 *.docx
-extracted_docx/
-
-# Environment & Config Files
-.env*
-js/firebase-config.js
-firebase_config*.json
-projects.json
-projects_list*.json
-login_list*.json
-projects.txt
-projects_utf8.txt
-projects_check.json
-final_*.json
-
-# Dependencies
-node_modules/
-package-lock.json
-
-# Local storage backups & logs
-*.log
+*.bak
 backup_*.json
+work_orders_*.csv
+indents_*.csv
+inventory_*.csv
+gate_passes_*.csv
+tenders_*.csv

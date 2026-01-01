@@ -41,7 +41,7 @@ const DATA = {
         {
             name: 'Switches & Sockets',
             items: [
-                '6A switch Non modular', '6A Socket non Modular', '16A switch Non modular', '16A Socket non Modular',
+                '6A switch Non Modular', '6A Socket Non Modular', '16A switch Non Modular', '16A Socket Non Modular',
                 '6A Combinder with Box', '16A Combinder', '16A Combinder with Box', '6M box & Plate', '12M box & Plate',
                 '6A Modular Switch', '6A Modular Socket', '16A Modular Switch', '16A Modular Socket'
             ],
@@ -131,7 +131,7 @@ const DATA = {
         },
         {
             name: 'Exhaust fan',
-            items: ['Light duty 300 MM [Metal]', 'Heavy Duty 300 MM [Metal]'],
+            items: ['Light duty 300 MM [Metal]', 'Heavy Duty 300 MM [Metal]', 'Exhaust fan (PVC)'],
             unit: 'Nos'
         },
         {
@@ -206,7 +206,7 @@ const storage = {
             const compressed = utils.compress(data);
 
             // High-level sync: Overwrite the document with the compressed array
-            await db.collection('app_data').doc(key).set({
+            await window.db.collection('app_data').doc(key).set({
                 items: compressed,
                 updatedAt: new Date().toISOString(),
                 format: 'compressed_v1'
@@ -226,7 +226,7 @@ const storage = {
         const keys = ['work_orders', 'indents', 'gate_passes', 'tenders'];
 
         keys.forEach(key => {
-            db.collection('app_data').doc(key).onSnapshot(doc => {
+            window.db.collection('app_data').doc(key).onSnapshot(doc => {
                 const localData = this.get(key);
 
                 if (doc.exists) {
@@ -279,10 +279,9 @@ const storage = {
     },
 
     async internal_factoryReset() {
-        // This function is for administrative use via command only.
-        if (!confirm('🛑 CRITICAL ACTION: This will delete ALL data (Work Orders, Indents, Gate Passes, Tenders) from the Cloud and this device.')) return;
+        if (!confirm('🛑 CRITICAL ACTION: This will delete ALL data (Work Orders, Indents, Gate Passes, Tenders, Inventory) from both Cloud and this device.')) return;
 
-        const secondConfirm = confirm('Please confirm ONE LAST TIME. This cannot be undone.');
+        const secondConfirm = confirm('Are you PATHETICALLY SURE? This will wipe everything for a final production fresh start. This cannot be undone.');
         if (!secondConfirm) return;
 
         try {
@@ -293,17 +292,21 @@ const storage = {
 
             // 2. Clear Cloud Data
             if (window.db) {
-                const cloudKeys = ['work_orders', 'indents', 'gate_passes', 'tenders'];
-                for (const key of cloudKeys) {
-                    await db.collection('app_data').doc(key).set({ items: [], updatedAt: new Date().toISOString(), status: 'RESET' });
+                // Wipe all operational collections
+                for (const key of keys) {
+                    await window.db.collection('app_data').doc(key).set({
+                        items: [],
+                        updatedAt: new Date().toISOString(),
+                        status: 'SYSTEM_WIPE_FRESH_START'
+                    });
                 }
             }
 
-            alert('✅ Application has been reset to factory state. The page will now reload.');
+            alert('✅ Success! System has been wiped and reset for real production use. Reloading now...');
             window.location.reload();
         } catch (e) {
-            console.error('Factory Reset Error:', e);
-            alert('Error during reset. Please check console.');
+            console.error('Reset Error:', e);
+            alert('Error during reset. Some data might remain. Check console.');
         }
     },
 
@@ -348,7 +351,7 @@ const storage = {
             const compressed = utils.compress(items);
             const archiveId = `${key}_${new Date().getFullYear()}_${Math.floor(new Date().getMonth() / 3)}`; // Quarterly archives
 
-            await db.collection('archived_data').doc(archiveId).set({
+            await window.db.collection('archived_data').doc(archiveId).set({
                 items: firebase.firestore.FieldValue.arrayUnion(...compressed),
                 key,
                 period: archiveId.split('_').slice(1).join('-'),

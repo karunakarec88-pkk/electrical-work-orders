@@ -189,7 +189,7 @@ const pendingModule = {
                     ${ratings.map(r => `<option value="${r}" ${r === ratingValue ? 'selected' : ''}>${r}</option>`).join('')}
                 </select>
             `;
-        } else if (category.name === 'Switches & Sockets' && item.includes('Modular') && category.companies) {
+        } else if (category.name === 'Switches & Sockets' && item.includes('Modular') && !item.toLowerCase().includes('non modular') && category.companies) {
             configHtml = `
                 <select class="rating-select mt-2" onchange="pendingModule.updateTempItem('${category.name}', '${item}', null, this.value)">
                     <option value="">Company...</option>

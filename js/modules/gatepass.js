@@ -170,7 +170,7 @@ const gatePassModule = {
                     <div class="flex-1 w-full">
                         <label class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1.5 block">Select Material</label>
                         <div class="relative group" onclick="gatePassModule.showMaterialPicker('${rowId}')">
-                            <input type="text" class="mat-name-input w-full bg-slate-900/60 border-2 border-slate-700/50 text-sm font-bold text-slate-100 px-4 h-12 rounded-xl cursor-pointer hover:border-primary/50 transition-all shadow-inner" placeholder="Tap to search material..." readonly>
+                            <input type="text" class="mat-name-input w-full bg-slate-900/60 border-2 border-slate-700/50 text-base font-black text-slate-100 px-4 h-14 rounded-xl cursor-pointer hover:border-primary/50 transition-all shadow-inner" placeholder="Tap to search material..." readonly>
                             <i data-lucide="chevron-down" size="16" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-primary transition-colors"></i>
                         </div>
                     </div>
@@ -178,9 +178,9 @@ const gatePassModule = {
                     <div class="w-full sm:w-32 shrink-0">
                         <label class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1.5 block">Total Qty</label>
                         <div class="flex items-center gap-1">
-                            <button type="button" onclick="this.nextElementSibling.stepDown()" class="w-10 h-12 bg-slate-700/50 border border-slate-600/50 rounded-l-xl flex items-center justify-center hover:bg-slate-600 text-white font-black text-xl">-</button>
-                            <input type="number" class="total-qty-input qty-input w-12 h-12 font-black text-primary bg-slate-900/80 border-y border-slate-600/50 text-center focus:ring-0" value="1" min="1">
-                            <button type="button" onclick="this.previousElementSibling.stepUp()" class="w-10 h-12 bg-slate-700/50 border border-slate-600/50 rounded-r-xl flex items-center justify-center hover:bg-slate-600 text-white font-black text-xl">+</button>
+                            <button type="button" onclick="this.nextElementSibling.stepDown()" class="w-10 h-14 bg-slate-700/50 border border-slate-600/50 rounded-l-xl flex items-center justify-center hover:bg-slate-600 text-white font-black text-xl">-</button>
+                            <input type="number" class="total-qty-input qty-input w-12 h-14 font-black text-base text-primary bg-slate-900/80 border-y border-slate-600/50 text-center focus:ring-0" value="1" min="1">
+                            <button type="button" onclick="this.previousElementSibling.stepUp()" class="w-10 h-14 bg-slate-700/50 border border-slate-600/50 rounded-r-xl flex items-center justify-center hover:bg-slate-600 text-white font-black text-xl">+</button>
                         </div>
                     </div>
 
@@ -203,7 +203,7 @@ const gatePassModule = {
                         <span id="source-badge-${rowId}" class="text-[8px] px-2 py-0.5 rounded-full bg-slate-700 font-bold text-slate-400 uppercase tracking-tighter">Required</span>
                     </div>
 
-                    <div id="indent-status-${rowId}" class="group relative bg-slate-900/80 border-2 border-dashed border-indigo-500/20 rounded-2xl p-4 cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all flex items-center justify-between" onclick="gatePassModule.toggleIndentList('${rowId}')">
+                    <div id="indent-status-${rowId}" class="group relative bg-slate-900/80 border-2 border-dashed border-indigo-500/20 rounded-2xl p-4 cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all flex items-center justify-between" onclick="gatePassModule.showIndentPicker('${rowId}')">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-lg group-hover:scale-110 transition-transform">
                                 <i data-lucide="plus" id="status-icon-${rowId}"></i>
@@ -221,44 +221,6 @@ const gatePassModule = {
                     <!-- Hidden Inputs -->
                     <input type="hidden" class="source-input" value="">
                     <input type="hidden" class="indent-id-input" value="">
-
-                    <!-- EXPANDABLE INDENT REGISTRY -->
-                    <div id="indent-selection-${rowId}" class="mt-6 overflow-hidden hidden">
-                        <div class="bg-slate-900 border border-indigo-500/20 rounded-2xl shadow-2xl p-6 space-y-8">
-                            <!-- Local Registry -->
-                            <div class="registry-section">
-                                <div class="flex items-center justify-between mb-4 px-2">
-                                     <div class="flex items-center gap-2">
-                                         <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse"></div>
-                                         <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest">Local Procurement Database</span>
-                                     </div>
-                                     <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Records Below</span>
-                                </div>
-                                <div class="local-list flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 thin-scrollbar"></div>
-                            </div>
-
-                            <!-- Gem Registry -->
-                            <div class="registry-section pt-6 border-t border-white/5">
-                                <div class="flex items-center justify-between mb-4 px-2">
-                                     <div class="flex items-center gap-2">
-                                         <div class="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50 animate-pulse"></div>
-                                         <span class="text-[10px] text-blue-400 uppercase font-black tracking-widest">GeM Portal Registry</span>
-                                     </div>
-                                     <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Records Below</span>
-                                </div>
-                                <div class="gem-list flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 thin-scrollbar"></div>
-                            </div>
-
-                            <!-- Stock Fallback -->
-                            <div class="pt-6 border-t border-white/5">
-                                <div id="no-indent-chip-${rowId}" onclick="gatePassModule.selectIndent('${rowId}', 'NO_INDENT', '')" 
-                                     class="indent-chip w-full p-4 bg-slate-800 border-2 border-slate-700/50 rounded-2xl cursor-pointer hover:border-slate-300 transition-all flex items-center justify-center gap-3 group">
-                                     <i data-lucide="layers" size="16" class="text-slate-500 group-hover:text-primary"></i>
-                                     <span class="text-[11px] font-black text-slate-400 group-hover:text-white uppercase tracking-widest">Direct Stock Entry (No Matching Indent)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- 3. QUARTERLY DISTRIBUTION SECTION -->
@@ -328,99 +290,154 @@ const gatePassModule = {
         lucide.createIcons();
     },
 
-    toggleIndentList(rowId) {
-        const list = document.getElementById(`indent-selection-${rowId}`);
-        if (!list) return;
+    showIndentPicker(rowId) {
+        const overlay = document.createElement('div');
+        overlay.className = 'picker-overlay';
+        overlay.id = 'indent-picker-modal';
+        overlay.innerHTML = `
+            <div class="picker-content !max-w-4xl !h-[90vh] flex flex-col p-0 overflow-hidden bg-[#0a0f18] border-primary/20">
+                <!-- Picker Header -->
+                <div class="p-6 border-b border-primary/10 bg-slate-900/50">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-primary/20 rounded-xl">
+                                <i data-lucide="link" class="text-primary" size="20"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-black uppercase tracking-widest text-lg">Indents Registry</h3>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Select an Indent to link with your material</p>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('indent-picker-modal').remove()" class="p-2 hover:bg-white/5 rounded-full transition-colors">
+                            <i data-lucide="x" class="text-slate-400"></i>
+                        </button>
+                    </div>
 
-        const isHidden = list.classList.contains('hidden');
-        if (isHidden) {
-            list.classList.remove('hidden');
-            // Add a small delay to ensure icons are created after layout
-            setTimeout(() => {
-                this.renderCategorizedIndents(rowId);
-            }, 10);
-        } else {
-            list.classList.add('hidden');
-        }
+                    <!-- Search & Filter Bar -->
+                    <div class="relative">
+                        <i data-lucide="search" size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="picker-search-input" 
+                               class="w-full bg-slate-800/50 border-2 border-slate-700/50 rounded-2xl pl-12 pr-4 h-14 text-sm font-bold text-white focus:border-primary transition-all placeholder:text-slate-600 shadow-inner" 
+                               placeholder="Search by Indent # or Material Name..."
+                               oninput="gatePassModule.renderCategorizedIndents('${rowId}', this.value)">
+                    </div>
+                </div>
+
+                <!-- Scrollable Content -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-8 thin-scrollbar">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Local Section -->
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 px-2">
+                                <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+                                <span class="text-xs text-emerald-400 font-black uppercase tracking-widest">Local Procurement</span>
+                            </div>
+                            <div class="local-list space-y-4"></div>
+                        </div>
+
+                        <!-- GeM Section -->
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 px-2">
+                                <div class="w-3 h-3 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></div>
+                                <span class="text-xs text-blue-400 font-black uppercase tracking-widest">GeM Portal Registry</span>
+                            </div>
+                            <div class="gem-list space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Stock Entry -->
+                    <div class="pt-8 border-t border-white/5">
+                        <div onclick="gatePassModule.selectIndent('${rowId}', 'NO_INDENT', '')" 
+                             class="group p-6 bg-slate-800/40 border-2 border-dashed border-slate-700/50 rounded-3xl cursor-pointer hover:border-slate-300 transition-all flex flex-col items-center gap-4">
+                             <div class="p-4 bg-slate-700/50 rounded-2xl group-hover:bg-primary/20 transition-colors">
+                                <i data-lucide="layers" size="24" class="text-slate-500 group-hover:text-primary"></i>
+                             </div>
+                             <div class="text-center">
+                                <span class="block text-sm font-black text-slate-400 group-hover:text-white uppercase tracking-widest">Direct Stock Entry</span>
+                                <span class="text-[10px] text-slate-600 font-bold uppercase">Use this if there is no matching indent recorded</span>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        this.renderCategorizedIndents(rowId);
+        lucide.createIcons();
     },
 
-    renderCategorizedIndents(rowId) {
+    renderCategorizedIndents(rowId, searchQuery = '') {
         const row = document.getElementById(rowId);
         if (!row) return;
 
-        const allIndents = storage.get('indents').filter(i =>
-            i.status === 'pending' || i.status === 'approved' || i.status === 'received'
-        );
+        let allIndents = storage.get('indents')
+            .filter(i => i.status === 'pending' || i.status === 'approved' || i.status === 'received')
+            .sort((a, b) => new Date(b.indentDate) - new Date(a.indentDate));
 
-        const localList = row.querySelector('.local-list');
-        const gemList = row.querySelector('.gem-list');
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            allIndents = allIndents.filter(i =>
+                (i.indentNumber && i.indentNumber.toLowerCase().includes(q)) ||
+                i.items.some(item => item.item.toLowerCase().includes(q))
+            );
+        }
+
+        const modal = document.getElementById('indent-picker-modal');
+        const localList = modal.querySelector('.local-list');
+        const gemList = modal.querySelector('.gem-list');
 
         const localIndents = allIndents.filter(i => i.type === 'LOCAL');
         const gemIndents = allIndents.filter(i => i.type === 'GEM');
 
         const renderChip = (indent, source) => {
             // Split items into bullet points for better readability
-            const itemsList = indent.items.map(i => `
-                <div class="flex items-center gap-3 text-[12px] text-slate-100 font-bold mb-1.5 p-2 bg-slate-800/60 rounded-lg border border-white/5">
-                    <div class="w-1.5 h-1.5 rounded-full bg-primary/60 shadow-lg shadow-primary/30"></div>
-                    <span class="flex-1">${i.item}</span>
-                    <span class="text-primary font-black">Qty: ${i.quantity}</span>
-                </div>
-            `).join('');
+            const itemsList = indent.items.map(i => {
+                const initial = i.initialQuantity !== undefined ? i.initialQuantity : i.quantity;
+                const used = initial - i.quantity;
+                const qtrTotal = i.quartersQty || 0;
+                const qtrAvailable = Math.max(0, qtrTotal - used);
+                return `
+                    <div class="flex flex-col gap-1.5 p-3 bg-slate-800/40 rounded-xl border border-white/5">
+                        <span class="text-[13px] text-slate-100 font-bold">${i.item}</span>
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="text-slate-500 font-black uppercase tracking-widest">Share</span>
+                            <span class="text-emerald-400 font-black">Available: ${qtrAvailable}</span>
+                        </div>
+                        <div class="h-1 w-full bg-slate-700/50 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500/50" style="width: ${qtrTotal > 0 ? (qtrAvailable / qtrTotal) * 100 : 0}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             return `
                 <div data-id="${indent.id}" data-source="${source}" onclick="gatePassModule.selectIndent('${rowId}', '${source}', '${indent.id}', '${indent.indentNumber}')" 
-                     class="indent-chip group bg-[#111827] border-2 border-slate-700/50 rounded-2xl overflow-hidden hover:border-primary transition-all cursor-pointer mb-6 shadow-2xl">
+                     class="indent-chip group bg-[#111827] border-2 border-slate-700/50 rounded-2xl overflow-hidden hover:border-primary transition-all cursor-pointer mb-2 shadow-2xl">
                     
-                    <!-- Box Header (Vertical Stack) -->
-                    <div class="px-5 py-5 bg-slate-800/40 border-b border-slate-700/50 flex flex-col gap-2">
+                    <div class="p-4 bg-slate-800/40 border-b border-slate-700/50 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                             <div class="p-1.5 bg-primary/10 rounded border border-primary/20">
-                                <i data-lucide="hash" size="12" class="text-primary"></i>
+                                <i data-lucide="hash" size="10" class="text-primary"></i>
                             </div>
-                            <span class="text-[12px] font-black text-white uppercase tracking-tight">Indent: #${indent.indentNumber}</span>
+                            <span class="text-[11px] font-black text-white uppercase tracking-tight">#${indent.indentNumber}</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="p-1.5 bg-slate-700/30 rounded border border-white/5">
-                                <i data-lucide="globe" size="12" class="text-slate-400"></i>
-                            </div>
-                            <span class="text-[12px] text-slate-100 font-bold uppercase tracking-widest">${source}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="p-1.5 bg-slate-700/30 rounded border border-white/5">
-                                <i data-lucide="calendar" size="12" class="text-slate-400"></i>
-                            </div>
-                            <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest">${utils.renderDate(indent.indentDate)}</span>
-                        </div>
+                        <span class="text-[10px] text-slate-500 font-bold">${utils.renderDate(indent.indentDate)}</span>
                     </div>
 
-                    <!-- Box Content -->
-                    <div class="p-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <i data-lucide="package" size="14" class="text-primary/70"></i>
-                            <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest">Included Materials</p>
-                        </div>
-                        <div class="space-y-1 mb-5">
-                            ${itemsList}
-                        </div>
-                        
-                        <!-- Select Button -->
-                        <div class="mt-2 pt-4 border-t border-slate-700/30 flex justify-center">
-                            <button type="button" class="w-full text-[11px] bg-primary/10 text-primary border-2 border-primary/20 py-2.5 rounded-xl font-black uppercase group-hover:bg-primary group-hover:text-slate-900 group-hover:border-primary transition-all flex items-center justify-center gap-2 shadow-lg">
-                                <i data-lucide="check-circle" size="14"></i>
-                                Link This Indent
-                            </button>
-                        </div>
+                    <div class="p-4 space-y-1">
+                        ${itemsList}
                     </div>
                 </div>
             `;
         };
 
         localList.innerHTML = localIndents.length > 0 ? localIndents.map(i => renderChip(i, 'LOCAL')).join('') :
-            `<div class="text-[8px] text-slate-600 italic py-1">No Local Indents</div>`;
+            `<div class="text-[10px] text-slate-600 italic py-8 text-center bg-slate-900/40 rounded-3xl border border-dashed border-white/5">No Matching Local Indents</div>`;
 
         gemList.innerHTML = gemIndents.length > 0 ? gemIndents.map(i => renderChip(i, 'GEM')).join('') :
-            `<div class="text-[8px] text-slate-600 italic py-1">No Gem Indents</div>`;
+            `<div class="text-[10px] text-slate-600 italic py-8 text-center bg-slate-900/40 rounded-3xl border border-dashed border-white/5">No Matching GeM Indents</div>`;
+
+        lucide.createIcons();
     },
 
     selectIndent(rowId, source, indentId, indentNumber = '') {
@@ -445,40 +462,26 @@ const gatePassModule = {
         if (source === 'NO_INDENT') {
             statusText.textContent = 'Direct Stock (No Indent)';
             statusSubtext.textContent = 'Material will be taken from store stock';
-            statusIcon.className = 'text-emerald-400';
             statusIcon.setAttribute('data-lucide', 'layers');
+            statusIcon.className = 'text-emerald-400';
             statusContainer.classList.add('bg-emerald-500/10', 'border-emerald-500/30');
             sourceBadge.textContent = 'STOCK ENTRY';
             sourceBadge.classList.add('bg-emerald-500', 'text-white');
         } else {
             statusText.textContent = `Linked to Indent #${indentNumber}`;
             statusSubtext.textContent = `Source: ${source} PROCUREMENT`;
+            statusIcon.setAttribute('data-lucide', 'check-circle');
             statusIcon.className = source === 'GEM' ? 'text-blue-400' : 'text-indigo-400';
-            statusIcon.setAttribute('data-lucide', 'file-check');
             statusContainer.classList.add(source === 'GEM' ? 'bg-blue-500/10' : 'bg-indigo-500/10', source === 'GEM' ? 'border-blue-500/30' : 'border-indigo-500/30');
             sourceBadge.textContent = source;
             sourceBadge.classList.add(source === 'GEM' ? 'bg-blue-500' : 'bg-indigo-500', 'text-white');
         }
+
+        // Close Modal
+        const modal = document.getElementById('indent-picker-modal');
+        if (modal) modal.remove();
+
         lucide.createIcons();
-
-        // Hide list
-        this.toggleIndentList(rowId);
-
-        // Update active states
-        row.querySelectorAll('.indent-chip').forEach(chip => {
-            if (chip.dataset.id === indentId && indentId !== '') {
-                chip.classList.add('active', '!border-indigo-500', '!bg-indigo-500/20');
-            } else {
-                chip.classList.remove('active', '!border-indigo-500', '!bg-indigo-500/20');
-            }
-        });
-
-        const noIndentChip = document.getElementById(`no-indent-chip-${rowId}`);
-        if (source === 'NO_INDENT') {
-            noIndentChip.classList.add('active', '!border-emerald-500', '!bg-emerald-500/20');
-        } else {
-            noIndentChip.classList.remove('active', '!border-emerald-500', '!bg-emerald-500/20');
-        }
     },
 
     submitPass() {
@@ -553,13 +556,25 @@ const gatePassModule = {
                     });
 
                     if (indentItem) {
-                        const qToDeduct = parseInt(totalQuantity) || 0;
                         if (indentItem.initialQuantity === undefined) {
                             indentItem.initialQuantity = parseInt(indentItem.quantity) || 0;
                         }
+
+                        // Quarters Share from manual allocation
+                        const qtrTotal = indentItem.quartersQty || 0;
+                        const qToDeduct = parseInt(totalQuantity) || 0;
+
+                        if (qToDeduct > qtrTotal) {
+                            alert(`Error for "${item}": Cannot exceed Quarters Share (${qtrTotal} ${utils.getUnit(item)}). Please set or increase the Quarters Split in the Indent module first.`);
+                            return;
+                        }
+
                         indentItem.quantity = Math.max(0, (parseInt(indentItem.quantity) || 0) - qToDeduct);
 
                         // Check if entire indent is now fulfilled
+                        // Note: If an indent is 50% fulfilled via gate pass, it might still have 50% left for LAB.
+                        // But for Gate Pass tracking, we consider it fulfilled when Quarters share is used?
+                        // Actually, let's keep it simple: just deduct.
                         const allFulfilled = indent.items.every(ii => (parseInt(ii.quantity) || 0) <= 0);
                         if (allFulfilled) indent.status = 'received';
                     }

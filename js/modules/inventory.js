@@ -18,10 +18,10 @@ const inventoryModule = {
             <div id="inventory-results" class="mt-4"></div>
             
             <div id="inventory-actions" class="hidden">
-                ${auth.isAdmin() ? `
+                ${auth.isOwner() ? `
                     <div class="admin-actions">
                         <button onclick="inventoryModule.downloadCSV()" class="btn-primary w-full mt-4">
-                            <i data-lucide="download"></i> Download CSV (Admin Only)
+                            <i data-lucide="download"></i> Download CSV (Owner Only)
                         </button>
                     </div>
                 ` : ''}

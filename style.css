@@ -37,6 +37,7 @@
     box-sizing: border-box;
     font-family: 'Outfit', sans-serif;
     -webkit-tap-highlight-color: transparent;
+    font-size: 1.1rem;
 }
 
 body {
@@ -2457,4 +2458,46 @@ select {
 
 .log-info {
     color: #60a5fa;
+}
+
+/* Scrollbar Utilities */
+.thin-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.3);
+}
+
+/* Indent Picker Refinements */
+#indent-picker-modal .picker-content {
+    background: radial-gradient(circle at top right, #0f172a, #020617);
+    box-shadow: 0 0 50px rgba(99, 102, 241, 0.1);
+}
+
+#indent-picker-modal .indent-chip {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#indent-picker-modal .indent-chip:hover {
+    transform: translateX(4px);
+    background: rgba(30, 41, 59, 0.8) !important;
+}
+
+@media (max-width: 768px) {
+    #indent-picker-modal .picker-content {
+        height: 100vh !important;
+        max-height: none !important;
+        border-radius: 0 !important;
+    }
 }
