@@ -11,7 +11,7 @@
         content="Professional work order and tender management system for Electrical Department - Outside Campus">
     <script>
         // Force refresh logic for v3.3 deployment
-        const APP_VERSION = '3.4';
+        const APP_VERSION = '3.6';
         if (localStorage.getItem('app_version') !== APP_VERSION) {
             if ('serviceWorker' in navigator) {
                 caches.keys().then(names => {
@@ -71,11 +71,16 @@
                     </div>
 
                     <div class="login-box">
+                        <div class="input-wrapper mb-3">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="access-email" placeholder="Enter your email (for tracking)..."
+                                autocomplete="email">
+                        </div>
                         <div class="input-wrapper mb-4">
                             <i data-lucide="key-round" class="input-icon"></i>
                             <input type="password" id="access-key" placeholder="Enter Security Key..."
                                 autocomplete="current-password">
-                            <button onclick="auth.togglePassword('access-key')" class="toggle-pass">
+                            <button type="button" onclick="auth.togglePassword('access-key')" class="toggle-pass">
                                 <i data-lucide="eye"></i>
                             </button>
                         </div>
@@ -86,8 +91,8 @@
                     </div>
 
                     <div class="auth-footer">
-                        <p>Department of Electrical Engineering</p>
-                        <small style="opacity: 0.3; font-size: 0.6rem; display: block; margin-top: 5px;">v3.0
+                        <p>Electrical Outside campus</p>
+                        <small style="opacity: 0.3; font-size: 0.6rem; display: block; margin-top: 5px;">v3.5
                             Master</small>
                     </div>
                 </div>

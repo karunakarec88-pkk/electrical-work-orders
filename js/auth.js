@@ -21,7 +21,14 @@ const auth = {
     },
 
     handleAccessKey() {
+        const emailInput = document.getElementById('access-email').value.trim();
         const keyInput = document.getElementById('access-key').value.trim().toLowerCase();
+
+        if (!emailInput || !emailInput.includes('@')) {
+            alert('❌ Please enter a valid email address for tracking.');
+            return;
+        }
+
         const role = this.KEYS[keyInput];
 
         if (!role) {
@@ -29,17 +36,17 @@ const auth = {
             return;
         }
 
-        // Create virtual user session
+        // Create virtual user session with email tracking
         this.user = {
             role: role,
-            email: role === 'owner' ? 'karunakarec88@gmail.com' : `${role}@local`,
+            email: emailInput,
             uid: `virtual_${role}_${Date.now()}`
         };
 
         // Persist session
         localStorage.setItem('auth_session', JSON.stringify(this.user));
         this.showMainApp();
-        console.log(`🔐 Access Granted: Role = ${role}`);
+        console.log(`🔐 Access Granted: Role = ${role}, User = ${emailInput}`);
     },
 
     showMainApp() {
@@ -64,8 +71,10 @@ const auth = {
         document.getElementById('main-content').classList.add('hidden');
         document.getElementById('user-info').classList.add('hidden');
 
-        // Clear input
+        // Clear inputs
+        const emailField = document.getElementById('access-email');
         const keyField = document.getElementById('access-key');
+        if (emailField) emailField.value = '';
         if (keyField) keyField.value = '';
     },
 

@@ -4,7 +4,9 @@
         "ignore": [
             "firebase.json",
             "**/.*",
-            "**/node_modules/**"
+            "**/node_modules/**",
+            "wipe-data.js",
+            "js/firebase-config-template.js"
         ],
         "rewrites": [
             {
