@@ -90,6 +90,11 @@ const completedModule = {
             </button>
             <h3 class="mt-4">Edit Work Order</h3>
             <div class="form-group mt-6">
+                <label>Completion Date</label>
+                <input type="date" id="edit-completed-at" class="form-control" value="${new Date(order.completedAt).toISOString().split('T')[0]}">
+            </div>
+
+            <div class="form-group">
                 <label>Select Technicians (Multi-select)</label>
                 <div class="tech-grid">
                     ${DATA.technicians.map(t => `
@@ -316,10 +321,23 @@ const completedModule = {
             return;
         }
 
+        const newCompletedAtString = document.getElementById('edit-completed-at').value;
         const orders = storage.get('work_orders');
         const orderIndex = orders.findIndex(o => o.id === id);
 
         if (orderIndex !== -1) {
+            const originalDate = new Date(orders[orderIndex].completedAt);
+            const selectedDate = new Date(newCompletedAtString);
+
+            // Handle edge case where date selection might fail
+            if (!isNaN(selectedDate.getTime())) {
+                // Keep the original time if possible, just change the date part
+                originalDate.setFullYear(selectedDate.getFullYear());
+                originalDate.setMonth(selectedDate.getMonth());
+                originalDate.setDate(selectedDate.getDate());
+                orders[orderIndex].completedAt = originalDate.toISOString();
+            }
+
             orders[orderIndex].technicians = selectedTechs;
             orders[orderIndex].materials = materialsUsed;
             orders[orderIndex].updatedAt = new Date().toISOString();
