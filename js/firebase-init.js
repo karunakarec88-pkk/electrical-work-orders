@@ -12,6 +12,19 @@ if (typeof firebase !== 'undefined') {
         window.db = firebase.firestore();
         window.fAuth = firebase.auth();
 
+        // 🛡️ Initialize App Check
+        if (typeof firebase.appCheck !== 'undefined' && window.firebaseConfig.recaptchaSiteKey) {
+            const appCheck = firebase.appCheck();
+            // Use ReCaptcha Enterprise or v3
+            appCheck.activate(
+                new firebase.appCheck.ReCaptchaV3Provider(window.firebaseConfig.recaptchaSiteKey),
+                true // IsTokenAutoRefreshEnabled
+            );
+            console.log('🛡️ App Check: Initialized with reCAPTCHA v3');
+        } else {
+            console.warn('⚠️ App Check: Skipped (Missing Site Key)');
+        }
+
         console.log('✅ Firebase SDK: Initialized successfully.');
         initializeCloudSync();
 

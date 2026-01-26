@@ -11,7 +11,7 @@
         content="Professional work order and tender management system for Electrical Department - Outside Campus">
     <script>
         // Force refresh logic for v3.3 deployment
-        const APP_VERSION = '4.6';
+        const APP_VERSION = '4.7';
         if (localStorage.getItem('app_version') !== APP_VERSION) {
             if ('serviceWorker' in navigator) {
                 caches.keys().then(names => {
@@ -189,6 +189,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
     <script src="js/firebase-config.js?v=32"></script>
     <script src="js/firebase-init.js?v=32"></script>
     <script src="js/modules/upload.js?v=32"></script>
