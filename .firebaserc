@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "work-orders--inventory"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }

@@ -1,18 +1,47 @@
 const indentsModule = {
-    render(container) {
-        const indents = storage.get('indents').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    render(container, searchQuery = '') {
+        let indents = storage.get('indents').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        // Migration: Set latest indent's name to "D V.RAO" if requested and missing
+        if (indents.length > 0 && !indents[0].indentorName) {
+            indents[0].indentorName = 'D V.RAO';
+            storage.set('indents', indents);
+        }
+
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            indents = indents.filter(indent => {
+                const matchesIndentNo = (indent.indentNumber || '').toLowerCase().includes(query);
+                const matchesIndentor = (indent.indentorName || '').toLowerCase().includes(query);
+                const matchesMaterials = indent.items.some(item => (item.item || '').toLowerCase().includes(query));
+                return matchesIndentNo || matchesIndentor || matchesMaterials;
+            });
+        }
 
         container.innerHTML = `
-            <div class="indent-actions mb-4">
-                <button onclick="indentsModule.showNewIndentForm()" class="btn-primary w-full">
+            <div class="indent-actions space-y-4 mb-6">
+                <button onclick="indentsModule.showNewIndentForm()" class="btn-primary w-full shadow-lg shadow-primary/20">
                     <i data-lucide="plus"></i> Create New Indent
                 </button>
+                
+                <div class="search-box relative">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size="18"></i>
+                    <input type="text" 
+                           placeholder="Search by Material, No, or Indentor..." 
+                           class="w-full bg-slate-900/50 border-2 border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-sm focus:border-primary outline-none transition-all"
+                           value="${searchQuery}"
+                           oninput="indentsModule.handleSearch(this.value)">
+                </div>
             </div>
             <div id="indents-list" class="space-y-10 pb-20">
                 ${this.renderList(indents)}
             </div>
         `;
         lucide.createIcons();
+    },
+
+    handleSearch(query) {
+        this.render(document.getElementById('view-content'), query);
     },
 
     renderList(indents) {
@@ -39,14 +68,15 @@ const indentsModule = {
                                     ` : ''}
                                 </div>
                             </div>
-                            <h4 class="text-primary">Date: ${utils.renderDate(indent.indentDate) || utils.renderDate(indent.createdAt)}</h4>
+                            <h4 class="text-primary mt-1">Date: ${utils.renderDate(indent.indentDate) || utils.renderDate(indent.createdAt)}</h4>
+                            ${indent.indentorName ? `<p class="text-[11px] font-bold text-slate-300 mt-1 flex items-center gap-1.5"><i data-lucide="user" size="10"></i> INDENTOR: ${utils.sanitize(indent.indentorName)}</p>` : ''}
                             ${indent.approvedAt ? `<p class="text-[10px] text-muted-foreground mt-1">Approved: ${utils.renderDate(indent.approvedAt)}</p>` : ''}
                         </div>
                     </div>
                     <div class="material-summary mt-3 space-y-3">
                         ${(() => {
                 const gatePasses = storage.get('gate_passes');
-                return indent.items.map(item => {
+                return indent.items.map((item, idx) => {
                     const normalize = (s) => {
                         if (!s) return '';
                         const lastColonIndex = s.lastIndexOf(':');
@@ -101,7 +131,8 @@ const indentsModule = {
                                     <div class="indent-item-box">
                                             <div class="flex flex-col">
                                                 <div class="flex items-center gap-2 mb-2">
-                                                    <span class="text-lg font-black ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-100'}">${item.item}</span>
+                                                    <span class="text-base font-black text-slate-400">(${idx + 1})</span>
+                                                    <span class="text-lg font-black indent-item-highlight ${isCompleted ? 'opacity-50 line-through' : ''}">${item.item}</span>
                                                     ${!isCompleted && (usedQty / initialQty) >= 0.8 ? `
                                                         <span class="usage-warning-badge pulse-warning" title="High Usage Alert: 80% or more used">
                                                             <i data-lucide="alert-triangle" size="12"></i> ATTENTION
@@ -129,26 +160,26 @@ const indentsModule = {
                                                 </p>
                                             </div>
                                             <div class="flex gap-2 border-b border-white/5 bg-slate-900/40 p-1">
-                                                <div class="flex-1 p-3 rounded-xl bg-indigo-500/5 border border-white/5">
-                                                    <span class="block text-[8px] text-indigo-400/60 uppercase font-black mb-1">LAB Split</span>
+                                                <div class="flex-1 p-3 rounded-xl bg-gold/10 border border-white/5 text-center">
+                                                    <span class="block text-[8px] text-amber-500 uppercase font-black mb-1">LAB Split</span>
                                                     <input type="number" 
-                                                           class="w-full bg-transparent border-none text-indigo-200 font-black p-0 focus:ring-0 text-xl h-8" 
+                                                           class="w-full bg-transparent border-none text-gold font-black p-0 focus:ring-0 text-xl h-8 text-center" 
                                                            value="${item.labQty || 0}" 
                                                            step="0.5"
                                                            onchange="indentsModule.updateInlineSplit('${indent.id}', '${item.item.replace(/'/g, "\\'")}', 'lab', this.value)">
                                                 </div>
-                                                <div class="flex-1 p-3 rounded-xl bg-emerald-500/5 border border-white/5">
+                                                <div class="flex-1 p-3 rounded-xl bg-emerald-500/5 border border-white/5 text-center">
                                                     <span class="block text-[8px] text-emerald-400/60 uppercase font-black mb-1">Quarters Split</span>
                                                     <input type="number" 
-                                                           class="w-full bg-transparent border-none text-emerald-200 font-black p-0 focus:ring-0 text-xl h-8" 
+                                                           class="w-full bg-transparent border-none text-emerald-200 font-black p-0 focus:ring-0 text-xl h-8 text-center" 
                                                            value="${item.quartersQty || 0}" 
                                                            step="0.5"
                                                            onchange="indentsModule.updateInlineSplit('${indent.id}', '${item.item.replace(/'/g, "\\'")}', 'quarters', this.value)">
                                                 </div>
                                             </div>
-                                            <div class="p-4 flex items-center bg-emerald-500/10 gap-3">
-                                                <span class="w-24 text-[9px] text-emerald-400/70 uppercase font-black tracking-widest leading-tight">QUARTERS<br>SECTION STORE</span>
-                                                <div class="flex items-baseline">
+                                            <div class="p-4 flex flex-col items-center justify-center bg-emerald-500/10 gap-1 text-center">
+                                                <span class="text-[9px] text-emerald-400/70 uppercase font-black tracking-widest leading-tight">QUARTERS<br>SECTION STORE</span>
+                                                <div class="flex items-baseline justify-center">
                                                     <span class="text-xl text-emerald-300 font-black">: ${(item.quartersQty || 0) - usedQty}</span>
                                                     <span class="text-xs text-emerald-400/50 font-bold italic ml-2">&nbsp; ${unit}</span>
                                                 </div>
@@ -183,8 +214,10 @@ const indentsModule = {
                     ` : ''}
                     ${indent.status === 'pending' ? `
                         <div class="mt-3 flex gap-2">
-                            <button onclick="indentsModule.deleteIndent('${indent.id}')" class="btn-sm btn-outline text-error">Cancel</button>
-                            ${auth.isOwner() ? `<button onclick="indentsModule.approveIndent('${indent.id}')" class="btn-sm btn-accent">Approve</button>` : ''}
+                            ${auth.isOwner() ? `
+                                <button onclick="indentsModule.deleteIndent('${indent.id}')" class="btn-sm btn-outline text-error">Cancel</button>
+                                <button onclick="indentsModule.approveIndent('${indent.id}')" class="btn-sm btn-accent">Approve</button>
+                            ` : ''}
                         </div>
                     ` : ''}
                 </div>
@@ -199,10 +232,14 @@ const indentsModule = {
             <div class="form-container">
                 <h3>Create New Indent</h3>
                 
-                <div class="grid grid-cols-3 gap-4 mt-4">
+                <div class="grid grid-cols-2 gap-4 mt-4">
                     <div class="form-group">
                         <label>Indent Number</label>
                         <input type="text" id="indent-no" placeholder="Enter No...">
+                    </div>
+                    <div class="form-group">
+                        <label>Indentor Name</label>
+                        <input type="text" id="indentor-name" placeholder="Enter Name...">
                     </div>
                     <div class="form-group">
                         <label>Indent Date</label>
@@ -345,7 +382,7 @@ const indentsModule = {
 
     async submitIndent() {
         const indentNumber = document.getElementById('indent-no').value;
-        // ... (rest of the code needs to handle the nested inputs)
+        const indentorName = document.getElementById('indentor-name').value;
         const indentDate = document.getElementById('indent-date').value;
         const type = document.getElementById('indent-type').value;
         const fileInput = document.getElementById('indent-attachment');
@@ -410,6 +447,7 @@ const indentsModule = {
         indents.push({
             id: Date.now().toString(),
             indentNumber,
+            indentorName,
             indentDate,
             type,
             attachment,
@@ -619,19 +657,22 @@ const indentsModule = {
 
         const modalHtml = `
             <div id="indent-details-modal" class="overlay">
-                <div class="overlay-content !max-w-xl !w-full !p-6 max-h-[90vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                        <div class="text-left">
-                            <h3 class="text-primary">Indent #${indent.indentNumber}</h3>
-                            <p class="text-[10px] text-muted uppercase font-bold">Approved On: ${approvalDate}</p>
+                <div class="overlay-content !max-w-xl !w-[95%] !p-0 max-h-[90vh] overflow-hidden flex flex-col">
+                    <div class="modal-header p-5 bg-slate-900/80 backdrop-blur-md">
+                        <button onclick="document.getElementById('indent-details-modal').remove()" class="flex items-center gap-2 px-4 py-2 bg-gold text-black hover:bg-amber-500 rounded-xl text-xs font-black transition-all shadow-lg shadow-gold/30 whitespace-nowrap">
+                            <i data-lucide="arrow-left" size="16"></i> BACK
+                        </button>
+                        <div class="text-left overflow-hidden">
+                            <h3 class="text-primary text-base font-black truncate">Indent #${indent.indentNumber}</h3>
+                            <p class="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5 truncate">${approvalDate}</p>
                         </div>
-                        <button onclick="document.getElementById('indent-details-modal').remove()" class="btn-icon">
-                            <i data-lucide="x"></i>
+                        <button onclick="document.getElementById('indent-details-modal').remove()" class="ml-auto p-2 bg-slate-800/50 hover:bg-slate-700 rounded-lg transition-colors">
+                            <i data-lucide="x" class="text-slate-400" size="18"></i>
                         </button>
                     </div>
 
-                    <div class="space-y-6 text-left">
-                        ${indent.items.map(item => {
+                    <div class="flex-1 overflow-y-auto p-5 pt-0 space-y-6 text-left">
+                        ${indent.items.map((item, idx) => {
             // Find total received from passes for initial qty calculation
             let totalFromPasses = 0;
             gatePasses.forEach(gp => {
@@ -668,7 +709,10 @@ const indentsModule = {
             return `
                                 <div class="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3">
                                     <div class="flex justify-between items-center mb-2">
-                                        <span class="font-bold text-slate-100">${item.item}</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-black text-slate-500">(${idx + 1})</span>
+                                            <span class="font-black indent-item-highlight">${item.item}</span>
+                                        </div>
                                         <span class="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300">Purchased: ${initialQty} ${utils.getUnit(item.item)}</span>
                                     </div>
                                     <div class="mt-2 space-y-1">

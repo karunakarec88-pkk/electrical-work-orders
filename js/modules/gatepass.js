@@ -30,13 +30,18 @@ const gatePassModule = {
                         <span class="text-xs text-muted">Pass No: <strong>${utils.sanitize(pass.gatePassNo || pass.id.slice(-6))}</strong></span>
                         <h4 class="font-bold text-slate-100">${utils.renderDate(pass.gatePassDate || pass.createdAt)}</h4>
                     </div>
+                    ${auth.isOwner() ? `
+                        <button onclick="gatePassModule.deletePass('${pass.id}')" class="btn-icon text-error/60 hover:text-error transition-colors p-2" title="Delete Gate Pass">
+                            <i data-lucide="trash-2" size="18"></i>
+                        </button>
+                    ` : ''}
                 </div>
                 <div class="received-items space-y-4">
                     ${pass.items.map(item => {
             const indents = storage.get('indents');
             const linkedIndent = indents.find(i => i.id === item.indentId);
             const sourceText = item.source || 'LOCAL';
-            const sourceColor = sourceText === 'GEM' ? 'text-amber-400' : 'text-indigo-400';
+            const sourceColor = sourceText === 'GEM' ? 'text-amber-400' : 'text-gold';
             const indentDisplay = linkedIndent
                 ? `<span class="flex items-center ml-2 border-l border-slate-700 pl-2">
                     <span class="indent-badge">Indent: ${linkedIndent.indentNumber}</span>
@@ -778,4 +783,11 @@ const gatePassModule = {
         }
     },
 
+    deletePass(id) {
+        if (confirm('Permanently delete this Gate Pass record? This will NOT restore quantities in Indents.')) {
+            const passes = storage.get('gate_passes').filter(p => p.id !== id);
+            storage.set('gate_passes', passes);
+            this.render(document.getElementById('view-content'));
+        }
+    }
 };
